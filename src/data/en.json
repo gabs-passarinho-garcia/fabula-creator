@@ -1,0 +1,896 @@
+{
+  "steps": [
+    "Create the character's Identity.",
+    "Create or choose the character's Theme.",
+    "Create or choose the character's Origin.",
+    "Choose one, two, or three classes and distribute your five starting levels among them.",
+    "Determine the basic die type for the Attributes (Dexterity, Insight, Might, Will).",
+    "Calculate HP, MP, IP, Defense, Magic Defense, and Initiative.",
+    "Purchase equipment with 500z and roll 2d6 x 10 for extra zenit.",
+    "Describe the character, name, and pronouns."
+  ],
+  "identityTables": {
+    "concepts": [
+      "Knight",
+      "Bounty Hunter",
+      "Martial Artist",
+      "Treasure Hunter",
+      "Alien",
+      "Priest",
+      "Professor",
+      "Samurai",
+      "Bard",
+      "Soldier",
+      "Inventor",
+      "Smuggler",
+      "Automaton",
+      "Ninja",
+      "Diplomat",
+      "Thief",
+      "King/Queen",
+      "Mage",
+      "Gladiator",
+      "Noble"
+    ],
+    "adjectives": [
+      "Charming",
+      "Oathbreaker",
+      "Chosen",
+      "Disturbed",
+      "Brave",
+      "Anesiac",
+      "Attractive",
+      "Imperial",
+      "Loyal",
+      "Elderly",
+      "Chivalrous",
+      "Smiling",
+      "Influential",
+      "Grumpy",
+      "Hard-boiled",
+      "Young",
+      "Eccentric",
+      "Stealthy",
+      "Famous",
+      "Non-human"
+    ],
+    "details": [
+      "with ancient blood",
+      "on the run",
+      "of the Old Faith",
+      "seeking justice",
+      "in disgrace",
+      "of the Crimson Wings",
+      "of the Great Academy",
+      "from the moon",
+      "of the Seven Seas",
+      "from the future",
+      "seeking answers",
+      "without a homeland",
+      "of the Royal Army",
+      "from another dimension",
+      "from the past"
+    ]
+  },
+  "themes": [
+    {
+      "name": "Ambition",
+      "description": "You seek to prove your worth to yourself and/or to others."
+    },
+    {
+      "name": "Anger",
+      "description": "You are a ticking time bomb ready to explode with rage."
+    },
+    {
+      "name": "Belonging",
+      "description": "You fear being alone, forgotten, or abandoned."
+    },
+    {
+      "name": "Doubt",
+      "description": "You need to find the answer to a compelling question."
+    },
+    {
+      "name": "Duty",
+      "description": "You live to fulfill a promise or obey an order."
+    },
+    {
+      "name": "Hope",
+      "description": "You want to make the world a better place for yourself and/or for others."
+    }
+  ],
+  "attributes": {
+    "arrays": [
+      {
+        "description": "Specialized",
+        "values": "d10, d10, d6, d6"
+      },
+      {
+        "description": "Average",
+        "values": "d10, d8, d8, d6"
+      },
+      {
+        "description": "Jack of all trades",
+        "values": "d8, d8, d8, d8"
+      }
+    ]
+  },
+  "startingBudget": 500,
+  "startingEquipment": {
+    "weapons": [
+      {
+        "name": "Rapier",
+        "type": "melee",
+        "accuracyAttributes": [
+          "DEX",
+          "INS"
+        ],
+        "damageBonus": 6,
+        "damageType": "physical",
+        "isEquipped": true
+      }
+    ],
+    "armor": {
+      "name": "Travel garb",
+      "baseDefense": 1,
+      "baseMagicDefense": 1,
+      "isEquipped": true
+    }
+  },
+  "equipmentCatalog": {
+    "weapons": [
+      {
+        "name": "Staff",
+        "cost": 100,
+        "category": "arcane",
+        "type": "melee",
+        "accuracyAttributes": [
+          "WIL",
+          "WIL"
+        ],
+        "damageBonus": 6,
+        "damageType": "physical",
+        "isEquipped": false
+      },
+      {
+        "name": "Tome",
+        "cost": 100,
+        "category": "arcane",
+        "type": "melee",
+        "accuracyAttributes": [
+          "INS",
+          "INS"
+        ],
+        "damageBonus": 6,
+        "damageType": "physical",
+        "isEquipped": false
+      },
+      {
+        "name": "Crossbow",
+        "cost": 150,
+        "category": "ranged",
+        "type": "ranged",
+        "accuracyAttributes": [
+          "DEX",
+          "INS"
+        ],
+        "damageBonus": 8,
+        "damageType": "physical",
+        "isEquipped": false
+      },
+      {
+        "name": "Shortbow",
+        "cost": 200,
+        "category": "ranged",
+        "type": "ranged",
+        "accuracyAttributes": [
+          "DEX",
+          "DEX"
+        ],
+        "damageBonus": 8,
+        "damageType": "physical",
+        "isEquipped": false
+      },
+      {
+        "name": "Unarmed strike",
+        "cost": 0,
+        "category": "basic-melee",
+        "type": "melee",
+        "accuracyAttributes": [
+          "DEX",
+          "MIG"
+        ],
+        "damageBonus": 0,
+        "damageType": "physical",
+        "isEquipped": false
+      },
+      {
+        "name": "Steel dagger",
+        "cost": 150,
+        "category": "basic-melee",
+        "type": "melee",
+        "accuracyAttributes": [
+          "DEX",
+          "INS"
+        ],
+        "damageBonus": 4,
+        "damageType": "physical",
+        "isEquipped": false
+      },
+      {
+        "name": "Pistol",
+        "cost": 250,
+        "category": "ranged",
+        "type": "ranged",
+        "accuracyAttributes": [
+          "DEX",
+          "INS"
+        ],
+        "damageBonus": 8,
+        "damageType": "physical",
+        "isEquipped": false
+      },
+      {
+        "name": "Waraxe",
+        "cost": 250,
+        "category": "martial-melee",
+        "type": "melee",
+        "accuracyAttributes": [
+          "MIG",
+          "MIG"
+        ],
+        "damageBonus": 14,
+        "damageType": "physical",
+        "isEquipped": false
+      },
+      {
+        "name": "Rapier",
+        "cost": 200,
+        "category": "martial-melee",
+        "type": "melee",
+        "accuracyAttributes": [
+          "DEX",
+          "INS"
+        ],
+        "damageBonus": 6,
+        "damageType": "physical",
+        "isEquipped": false
+      }
+    ],
+    "armors": [
+      {
+        "name": "Travel garb",
+        "cost": 100,
+        "category": "light",
+        "baseDefense": 1,
+        "baseMagicDefense": 1,
+        "initiativePenalty": 0,
+        "isEquipped": false
+      },
+      {
+        "name": "Runic plate",
+        "cost": 250,
+        "category": "heavy",
+        "baseDefense": 11,
+        "baseMagicDefense": 1,
+        "initiativePenalty": 3,
+        "isEquipped": false
+      }
+    ],
+    "shields": [
+      {
+        "name": "Bronze shield",
+        "cost": 100,
+        "category": "martial",
+        "defenseBonus": 2,
+        "magicDefenseBonus": 0,
+        "isEquipped": false
+      },
+      {
+        "name": "Runic shield",
+        "cost": 150,
+        "category": "martial",
+        "defenseBonus": 2,
+        "magicDefenseBonus": 2,
+        "isEquipped": false
+      }
+    ]
+  },
+  "classes": [
+    {
+      "name": "Wayfarer",
+      "description": "An explorer who lives for the journey and learns from nature.",
+      "startingBenefits": [
+        "Permanently increase your maximum IP by 2."
+      ],
+      "powers": [
+        {
+          "name": "Treasure Hunter",
+          "maxLevel": 2,
+          "description": "Advantage when making discoveries during travels.",
+          "mechanics": "When your group travels through the world map, you make a discovery if you roll (SL + 1) or less on the Travel check (instead of only on a 1)."
+        },
+        {
+          "name": "Faithful Companion",
+          "maxLevel": 5,
+          "description": "Gain a level 5 construct, elemental, beast, or plant NPC as a companion.",
+          "mechanics": "With the group's help, create a fixed level 5 companion (does not level up, has no initiative of its own, maximum of two basic attacks). It receives a bonus equal to (SL) on Accuracy and Magic checks, and its maximum HP is ((SL x companion's basic Might die) + half your level). You spend your action to make it act on your turn."
+        },
+        {
+          "name": "Tavern Talk",
+          "maxLevel": 3,
+          "description": "Discover information while resting in inns.",
+          "mechanics": "When resting at an inn or tavern, you can ask the GM (SL) questions about the surroundings and inhabitants. The GM answers with true information, but you describe how you obtained it."
+        },
+        {
+          "name": "Practical",
+          "maxLevel": 4,
+          "description": "Recover IP after Travel checks.",
+          "mechanics": "You recover (SL) IP after each Travel check."
+        },
+        {
+          "name": "Experienced Traveler",
+          "maxLevel": 1,
+          "description": "Eases Travel checks.",
+          "mechanics": "You reduce the die rolled on your Travel checks by one step (minimum d6). This is not cumulative if more than one character has this power."
+        }
+      ]
+    },
+    {
+      "name": "Arcanist",
+      "description": "A spellcaster who summons powerful magical avatars known as Arcanum.",
+      "startingBenefits": [
+        "Permanently increase your maximum MP by 5.",
+        "You can perform Rituals of Ritualism."
+      ],
+      "powers": [
+        {
+          "name": "Ritual Arcanism",
+          "maxLevel": 1,
+          "description": "Allows performing rituals of the arcanism discipline.",
+          "mechanics": "You can perform arcanism rituals, using (WIL + WIL) for the Magic check."
+        },
+        {
+          "name": "Emergency Arcanum",
+          "maxLevel": 6,
+          "description": "Reduces the cost of summoning an Arcanum during a crisis.",
+          "mechanics": "While in crisis, the cost to summon your Arcanum is reduced by (SL x 5) MP."
+        },
+        {
+          "name": "Arcane Circle",
+          "maxLevel": 4,
+          "description": "Cast a free spell when dismissing an Arcanum.",
+          "mechanics": "On your turn, when voluntarily dismissing an Arcanum that was not summoned this turn (with an arcane weapon equipped), you can perform the Spell action without spending an action, provided the total cost of the spell is equal to or less than (SL x 5) MP (you still pay the MP cost)."
+        },
+        {
+          "name": "Arcane Regeneration",
+          "maxLevel": 2,
+          "description": "Heal HP when summoning an Arcanum.",
+          "mechanics": "When summoning an Arcanum, you recover (SL x 5) HP."
+        },
+        {
+          "name": "Bind and Summon",
+          "maxLevel": 1,
+          "description": "Allows binding and summoning Arcanum.",
+          "mechanics": "You bind Arcanum to your soul to summon them later, spending an action and 40 MP. When choosing this power during character creation, you already start bound to one Arcanum of your choice."
+        }
+      ]
+    },
+    {
+      "name": "Tinkerer",
+      "description": "A brilliant inventor focused on engineering, alchemy, and inventions.",
+      "startingBenefits": [
+        "Permanently increase your maximum IP by 2.",
+        "You can start Projects."
+      ],
+      "powers": [
+        {
+          "name": "Potion Rain",
+          "maxLevel": 2,
+          "description": "Makes a single-target healing potion affect more targets.",
+          "mechanics": "When you create a single-target healing potion, it can affect up to (SL) additional creatures, but each recovers only half the normal value."
+        },
+        {
+          "name": "Gadgets",
+          "maxLevel": 5,
+          "description": "Unlocks invention types (alchemy, infusions, technomagic).",
+          "mechanics": "Upon first acquisition, choose a type of gadget and gain its basic benefits. On subsequent acquisitions, choose between unlocking a new type, the advanced benefits of a type already possessed, or the superior benefits of a type whose advanced level is already possessed."
+        },
+        {
+          "name": "Secret Formula",
+          "maxLevel": 5,
+          "description": "Increases the healing and damage of created items.",
+          "mechanics": "Potions and magispheres that restore HP/MP restore (SL x 5) more points; elemental shards, magispheres, or damage potions deal (SL) additional damage."
+        },
+        {
+          "name": "Emergency Item",
+          "maxLevel": 1,
+          "description": "Extra action during a crisis to use items.",
+          "mechanics": "Once per conflict scene, when you are in crisis, you can take an additional action on your turn, provided it is the Inventory action."
+        },
+        {
+          "name": "Visionary",
+          "maxLevel": 5,
+          "description": "Accelerates active Projects.",
+          "mechanics": "When working on a Project, up to (SL x 100) zenit of the material cost is paid automatically, and you generate (SL) extra progress per day. Effects from multiple characters with this power stack."
+        }
+      ]
+    },
+    {
+      "name": "Sharpshooter",
+      "description": "Exceptional at dealing with threats at a distance.",
+      "startingBenefits": [
+        "Permanently increase your maximum HP by 5.",
+        "You can equip ranged weapons and martial shields."
+      ],
+      "powers": [
+        {
+          "name": "Barrage",
+          "maxLevel": 1,
+          "description": "Spend MP to grant Multi to a ranged attack.",
+          "mechanics": "When making a ranged attack, spend 10 MP to choose: the attack gains multi (2); or increase an existing multi property by +1, up to a maximum of multi (3)."
+        },
+        {
+          "name": "Crossfire",
+          "maxLevel": 1,
+          "description": "Negates enemy ranged attacks by spending MP.",
+          "mechanics": "When a visible creature makes a ranged attack, you can spend MP equal to (5 + the attacker's Accuracy check) to make that attack automatically fail against all targets, provided you have a ranged weapon equipped. Does not work against critical successes."
+        },
+        {
+          "name": "Ranged Weapon Mastery",
+          "maxLevel": 4,
+          "description": "Permanent bonus to ranged Accuracy.",
+          "mechanics": "You receive a bonus equal to (SL) on Accuracy checks with ranged weapons."
+        },
+        {
+          "name": "Hawkeye",
+          "maxLevel": 5,
+          "description": "Reward for using Guard without providing cover.",
+          "mechanics": "When taking the Guard action without choosing to cover anyone, you can: make your next ranged attack in the scene deal (SL x 3) additional damage; or make a free attack with an equipped bow or firearm, treating your HR as 0."
+        },
+        {
+          "name": "Warning Shot",
+          "maxLevel": 4,
+          "description": "Trades attack damage for a control effect.",
+          "mechanics": "After hitting with a ranged attack, you can forgo dealing damage to choose: the hit target(s) become shaken; or slow; or lose (SL x 10) MP."
+        }
+      ]
+    },
+    {
+      "name": "Elementalist",
+      "description": "Uses the destructive power of nature's elements.",
+      "startingBenefits": [
+        "Permanently increase your maximum MP by 5.",
+        "You can perform Rituals of Ritualism."
+      ],
+      "powers": [
+        {
+          "name": "Magical Artillery",
+          "maxLevel": 3,
+          "description": "Bonus to Magic when using an arcane weapon.",
+          "mechanics": "When casting an offensive spell with an arcane weapon equipped, you receive a bonus equal to (SL x 2) on the Magic check."
+        },
+        {
+          "name": "Cataclysm",
+          "maxLevel": 3,
+          "description": "Increases spell cost to deal more damage.",
+          "mechanics": "When casting an instantaneous spell with an arcane weapon equipped, you can increase the total cost by up to (SL x 10) MP; for every 10 extra MP spent this way, the spell deals 5 additional damage."
+        },
+        {
+          "name": "Elemental Ritualism",
+          "maxLevel": 1,
+          "description": "Allows rituals of the elementalism discipline.",
+          "mechanics": "You can perform elementalism rituals, using (INS + WIL) for the Magic check."
+        },
+        {
+          "name": "Magical Blade",
+          "maxLevel": 4,
+          "description": "Casts spells through non-arcane weapons.",
+          "mechanics": "When casting a single-target offensive spell with a total cost of up to (SL x 20) MP, you can use an equipped non-arcane weapon: the Magic check uses the same Accuracy formula as the weapon, with a bonus of (SL) if the formula includes Dexterity."
+        },
+        {
+          "name": "Elemental Magic",
+          "maxLevel": 10,
+          "description": "Learns Elementalist spells.",
+          "mechanics": "Each level, learn one Elementalist spell. Offensive Elementalist spells use (INS + WIL) for the Magic check."
+        }
+      ]
+    },
+    {
+      "name": "Entropist",
+      "description": "A chaotic mage who manipulates probability, time, and space.",
+      "startingBenefits": [
+        "Permanently increase your maximum MP by 5.",
+        "You can perform Rituals of Ritualism."
+      ],
+      "powers": [
+        {
+          "name": "Absorb MP",
+          "maxLevel": 5,
+          "description": "Recovers MP upon taking damage.",
+          "mechanics": "After taking damage, you recover (SL x 2) MP."
+        },
+        {
+          "name": "Entropic Ritualism",
+          "maxLevel": 1,
+          "description": "Allows rituals of the entropy discipline.",
+          "mechanics": "You can perform entropy rituals, using (INS + WIL) for the Magic check."
+        },
+        {
+          "name": "Entropic Magic",
+          "maxLevel": 10,
+          "description": "Learns Entropist spells.",
+          "mechanics": "Each level, learn one Entropist spell. Offensive Entropist spells use (INS + WIL) for the Magic check."
+        },
+        {
+          "name": "Lucky Seven",
+          "maxLevel": 1,
+          "description": "Replaces a die result with your lucky number.",
+          "mechanics": "You have a lucky number (starts at 7 each session). Once per scene, after a check, you can replace the value of a rolled die with your lucky number, even if the result would be impossible. The replaced value becomes your new lucky number."
+        },
+        {
+          "name": "Stolen Time",
+          "maxLevel": 4,
+          "description": "Manipulates time in combat by spending MP.",
+          "mechanics": "In a conflict, spend an action and up to (SL x 5) MP. For every 5 MP: make a creature slow, or remove that condition; or grant a free Equipment action; or deal (10 + SL x 5) damage to a slow enemy; or allow an ally who hasn't acted yet to take their turn right after yours."
+        }
+      ]
+    },
+    {
+      "name": "Spiritist",
+      "description": "Connected to vital energy and souls, focused on support, healing, and light.",
+      "startingBenefits": [
+        "Permanently increase your maximum MP by 5.",
+        "You can perform Rituals of Ritualism."
+      ],
+      "powers": [
+        {
+          "name": "Spiritist Ritualism",
+          "maxLevel": 1,
+          "description": "Allows rituals of the spiritism discipline.",
+          "mechanics": "You can perform spiritism rituals, using (INS + WIL) for the Magic check."
+        },
+        {
+          "name": "Support Magic",
+          "maxLevel": 1,
+          "description": "Grants a bonus to an ally with a Bond when casting support magic.",
+          "mechanics": "When casting a spell targeting an ally while an arcane weapon is equipped, choose a target with whom you share a Bond: they receive a bonus equal to the Bond's strength on the next check they make until the end of the scene."
+        },
+        {
+          "name": "Spirit Magic",
+          "maxLevel": 10,
+          "description": "Learns Spiritist spells.",
+          "mechanics": "Each level, learn one Spiritist spell. Offensive Spiritist spells use (INS + WIL) for the Magic check."
+        },
+        {
+          "name": "Healing Power",
+          "maxLevel": 2,
+          "description": "Increases the healing of support spells.",
+          "mechanics": "When casting a spell targeting an ally while an arcane weapon is equipped, each target ally recovers (3 + (SL x number of Bonds you have)) HP, in addition to the spell's normal healing."
+        },
+        {
+          "name": "Vismagus",
+          "maxLevel": 1,
+          "description": "Pays the cost of spells with HP instead of MP.",
+          "mechanics": "If you do not have enough MP for a spell, you can spend HP equal to (10 + the total MP cost) instead. If the spell would heal HP, that effect does not apply to you."
+        }
+      ]
+    },
+    {
+      "name": "Fury",
+      "description": "A relentless combatant driven by wrath and adrenaline.",
+      "startingBenefits": [
+        "Permanently increase your maximum HP by 5.",
+        "You can equip melee weapons and martial armor."
+      ],
+      "powers": [
+        {
+          "name": "Adrenaline",
+          "maxLevel": 5,
+          "description": "Extra damage while in crisis.",
+          "mechanics": "While in crisis, you deal (SL x 2) additional damage by any means (attacks, spells, Arcanum, items, etc.)."
+        },
+        {
+          "name": "Indomitable Spirit",
+          "maxLevel": 4,
+          "description": "Gains an extra benefit when spending Fabula Points.",
+          "mechanics": "When spending one or more Fabula Points, choose one: recover (SL x 5) HP; or (SL x 5) MP; or remove a condition."
+        },
+        {
+          "name": "Frenzy",
+          "maxLevel": 1,
+          "description": "Extra critical success chance with specific weapons.",
+          "mechanics": "Accuracy checks with brawling, daggers, flails, or thrown weapons count as a critical success if both dice show the same number (provided it is not a critical failure)."
+        },
+        {
+          "name": "Provoke",
+          "maxLevel": 5,
+          "description": "Forces an enemy to focus attacks on you.",
+          "mechanics": "Spend an action and 5 MP to make an opposed (MIG + WIL) check against a visible creature. On a success, it becomes enraged and compelled to attack you. You receive a bonus equal to (SL) on this check."
+        },
+        {
+          "name": "Resist",
+          "maxLevel": 5,
+          "description": "Heals HP and improves an Attribute when taking the Guard action.",
+          "mechanics": "When taking the Guard action without choosing to cover anyone, recover HP equal to (SL x the highest strength Bond you have) and choose Might or Will: until the end of your next turn, the current die of that Attribute increases by one step (maximum d12)."
+        }
+      ]
+    },
+    {
+      "name": "Guardian",
+      "description": "A defensive wall dedicated to protecting companions.",
+      "startingBenefits": [
+        "Permanently increase your maximum HP by 5.",
+        "You can equip martial armor and shields."
+      ],
+      "powers": [
+        {
+          "name": "Dual Shieldbearer",
+          "maxLevel": 1,
+          "description": "Equips two shields as a two-handed weapon.",
+          "mechanics": "You can equip a second shield in your main hand. With two shields equipped, you gain the benefits of both and can attack with them as a two-handed weapon 'Twin Shields' (MIG+MIG, HR+5 physical), dealing additional damage equal to your SL in Defensive Mastery."
+        },
+        {
+          "name": "Fortress",
+          "maxLevel": 5,
+          "description": "Permanently increases maximum HP.",
+          "mechanics": "Permanently increase your maximum HP by (SL x 3)."
+        },
+        {
+          "name": "Bodyguard",
+          "maxLevel": 1,
+          "description": "Protects an ally when taking the Guard action.",
+          "mechanics": "When taking the Guard action to cover an ally, that creature becomes Resistant to all damage types until the start of your next turn."
+        },
+        {
+          "name": "Defensive Mastery",
+          "maxLevel": 5,
+          "description": "Reduces damage taken with a shield or martial armor.",
+          "mechanics": "While you have a shield or martial armor equipped, all damage taken is reduced by (SL), applied before damage Affinities."
+        },
+        {
+          "name": "Protect",
+          "maxLevel": 1,
+          "description": "Takes the danger in place of an ally.",
+          "mechanics": "When another creature is targeted by an attack, spell, or danger, you can take their place: the checks involved are instead rolled against you. Cannot be used again until the start of your next turn in a conflict."
+        }
+      ]
+    },
+    {
+      "name": "Rogue",
+      "description": "An agile opportunist, master of theft and exploiting enemy weakness.",
+      "startingBenefits": [
+        "Permanently increase your maximum IP by 2."
+      ],
+      "powers": [
+        {
+          "name": "High Speed",
+          "maxLevel": 3,
+          "description": "Acts before the first round of conflict.",
+          "mechanics": "At the start of a conflict, spend 10 MP to, before the first round, make a free attack with an equipped weapon or take the Hinder/Objective action, with a bonus equal to (SL) on the checks involved."
+        },
+        {
+          "name": "Dodge",
+          "maxLevel": 3,
+          "description": "Increases Defense without armor or a martial shield.",
+          "mechanics": "While you do not have a shield or martial armor equipped, your Defense increases by (SL)."
+        },
+        {
+          "name": "Cheap Shot",
+          "maxLevel": 5,
+          "description": "Extra damage against single targets with negative status effects.",
+          "mechanics": "When hitting with an attack whose only target is suffering from one or more conditions, you deal additional damage equal to (SL + number of conditions the target has)."
+        },
+        {
+          "name": "Soul Theft",
+          "maxLevel": 5,
+          "description": "Steals IP or items from defeated enemies.",
+          "mechanics": "Once per creature, spend an action to roll a (DEX + WIL) check against a visible enemy's Magic Defense: against a soldier, recover (SL) IP; against an elite/champion, gain an item whose value is equal to the target's level x 30 (or x50 if a villain). You receive a bonus equal to (SL) on this check."
+        },
+        {
+          "name": "See You Later",
+          "maxLevel": 1,
+          "description": "Disappears from the scene and reappears elsewhere.",
+          "mechanics": "Spend an action and 1 Fabula Point to disappear from the current scene and reappear whenever you want in another scene with another PC."
+        }
+      ]
+    },
+    {
+      "name": "Dark Blade",
+      "description": "A cursed warrior who sacrifices their own life force to deal massive damage.",
+      "startingBenefits": [
+        "Permanently increase your maximum HP by 5.",
+        "You can equip martial melee weapons and armor."
+      ],
+      "powers": [
+        {
+          "name": "Agony",
+          "maxLevel": 5,
+          "description": "Heals HP and MP when harming enemies with a Bond.",
+          "mechanics": "Once per turn (including other characters' turns), after dealing damage to an enemy with whom you share a Bond, recover (SL x 2) HP and (SL x 2) MP."
+        },
+        {
+          "name": "Heart of Darkness",
+          "maxLevel": 1,
+          "description": "Creates a Bond of hatred upon entering a crisis.",
+          "mechanics": "Once per scene, upon entering crisis, choose a visible creature with whom you do not have a Bond and create a Bond of hatred with it."
+        },
+        {
+          "name": "Shadow Strike",
+          "maxLevel": 5,
+          "description": "Sacrifices HP for an attack with extra dark damage.",
+          "mechanics": "Spend an action: roll your Might die and lose HP equal to the result (if this does not reduce your HP to 0, proceed). Make a free attack; if it hits, deal additional dark damage equal to (SL + the value rolled on the Might die). This damage type cannot be changed."
+        },
+        {
+          "name": "Painful Lesson",
+          "maxLevel": 3,
+          "description": "Studies the enemy that just harmed them.",
+          "mechanics": "When you suffer HP loss, you can immediately take the Study action against whoever caused the damage, with a bonus equal to (SL) on the check."
+        },
+        {
+          "name": "Dark Blood",
+          "maxLevel": 1,
+          "description": "Darkness and poison Resistance during a crisis.",
+          "mechanics": "While in crisis, you gain Resistance to dark damage and poison damage."
+        }
+      ]
+    },
+    {
+      "name": "Weaponmaster",
+      "description": "An unrivaled specialist in melee combat and stances.",
+      "startingBenefits": [
+        "Permanently increase your maximum HP by 5.",
+        "You can equip martial melee weapons and martial shields."
+      ],
+      "powers": [
+        {
+          "name": "Bladeswhirl",
+          "maxLevel": 1,
+          "description": "Spends MP to grant Multi to a melee attack.",
+          "mechanics": "When making a melee attack, spend 10 MP to choose: the attack gains multi (2); or increase an existing multi property by +1, up to a maximum of multi (3)."
+        },
+        {
+          "name": "Counterattack",
+          "maxLevel": 1,
+          "description": "Retaliates against an enemy melee attack.",
+          "mechanics": "When an enemy hits or misses you with a melee attack and the total of their Accuracy check is an even number, you can make a free melee attack against that enemy (treating HR as 0 for damage calculation)."
+        },
+        {
+          "name": "Bonecrusher",
+          "maxLevel": 4,
+          "description": "Trades attack damage for a control effect.",
+          "mechanics": "When hitting with a melee attack, forgo dealing damage to choose: the target(s) become dazed; or weak; or lose (SL x 10) MP."
+        },
+        {
+          "name": "Melee Weapon Mastery",
+          "maxLevel": 4,
+          "description": "Permanent bonus to melee Accuracy.",
+          "mechanics": "You receive a bonus equal to (SL) on Accuracy checks with melee weapons."
+        },
+        {
+          "name": "Cleave",
+          "maxLevel": 3,
+          "description": "Special attack that destroys equipment or causes continuous damage.",
+          "mechanics": "Spend an action and 5 MP to make a single-target free melee attack that deals no damage; if it hits, choose: destroy the target's shield; or destroy their armor; or cause them to take (SL x 2) additional damage from all sources until your next turn."
+        }
+      ]
+    },
+    {
+      "name": "Orator",
+      "description": "A diplomat capable of manipulating allies and enemies with words.",
+      "startingBenefits": [
+        "Permanently increase your maximum MP by 5."
+      ],
+      "powers": [
+        {
+          "name": "Unexpected Ally",
+          "maxLevel": 1,
+          "description": "Makes a creature helpful by spending Fabula Points.",
+          "mechanics": "Spend an action and 1 Fabula Point to choose a non-hostile creature that can hear you; it becomes helpful, provided it is treated with respect and requests are reasonable."
+        },
+        {
+          "name": "Condemn",
+          "maxLevel": 4,
+          "description": "Debuffs an enemy with an opposed social check.",
+          "mechanics": "Spend an action and 5 MP for an opposed (INS + WIL) check against an enemy who can hear you. On a success, they lose (SL x 10) MP and become shaken or dazed (your choice), and they suffer (SL) additional damage from all sources until your next turn. You receive a bonus equal to (SL) on this check."
+        },
+        {
+          "name": "I Trust You",
+          "maxLevel": 2,
+          "description": "Lends your Traits or Bonds to an ally.",
+          "mechanics": "When a PC who can hear you makes a check, spend 1 Fabula Point to lend them one of your Traits or Bonds, allowing them to reroll or improve the result. If you share a Bond with that character, they recover (SL x 10) MP."
+        },
+        {
+          "name": "Encourage",
+          "maxLevel": 6,
+          "description": "Heals an ally and improves one of their Attributes.",
+          "mechanics": "Spend an action and 5 MP to choose an ally who can hear you: they recover (SL x 5) HP and choose an Attribute, whose current die increases by one step (maximum d12) until the start of your next turn."
+        },
+        {
+          "name": "Persuasive",
+          "maxLevel": 2,
+          "description": "Accelerates the filling of social clocks.",
+          "mechanics": "When succeeding on a charm, diplomacy, deception, or intimidation check to fill/erase sections of a clock, spend up to (SL x 20) MP to fill/erase one additional section for every 20 MP spent."
+        }
+      ]
+    },
+    {
+      "name": "Chimerist",
+      "description": "A wild mage who copies powers and spells from monsters.",
+      "startingBenefits": [
+        "Permanently increase your maximum MP by 5.",
+        "You can perform Rituals of Ritualism."
+      ],
+      "powers": [
+        {
+          "name": "Consume",
+          "maxLevel": 5,
+          "description": "Recovers MP when dealing damage with spells using certain weapons.",
+          "mechanics": "When dealing damage with a spell while a dagger, arcane weapon, or flail is equipped, recover (SL x 2) MP."
+        },
+        {
+          "name": "Feral Mimicry",
+          "maxLevel": 10,
+          "description": "Learns spells by witnessing monsters cast them.",
+          "mechanics": "Upon seeing a spell cast by a beast, monster, or plant, you can learn it as a Chimerist spell (noting the species). On the first acquisition, choose (INS+WIL) or (MIG+WIL) for your offensive spells. You memorize up to (SL + 2) spells; exceeding this limit requires replacing an old one."
+        },
+        {
+          "name": "Feral Speech",
+          "maxLevel": 1,
+          "description": "Communicates with beasts, monsters, and plants.",
+          "mechanics": "You can communicate with creatures of the beast, monster, and plant species."
+        },
+        {
+          "name": "Pathogenesis",
+          "maxLevel": 1,
+          "description": "Poisons enemies of the same species as the learned spell.",
+          "mechanics": "When dealing damage with a Chimerist spell, targets of the same species from which you learned that spell become poisoned."
+        },
+        {
+          "name": "Chimerist Ritualism",
+          "maxLevel": 1,
+          "description": "Allows rituals of the chimerism discipline.",
+          "mechanics": "You can perform chimerism rituals. Upon acquiring this power, choose (INS+WIL) or (MIG+WIL) for the Magic check of these rituals."
+        }
+      ]
+    },
+    {
+      "name": "Lorefinder",
+      "description": "A relentless seeker of knowledge who reads enemy weaknesses.",
+      "startingBenefits": [
+        "Permanently increase your maximum MP by 5."
+      ],
+      "powers": [
+        {
+          "name": "Quick Scan",
+          "maxLevel": 6,
+          "description": "Reveals Traits or Affinities at the start of a conflict.",
+          "mechanics": "At the start of a conflict, spend up to (SL x 5) MP. For every 5 MP: reveal one Trait of a visible creature; or reveal its Affinity to a chosen damage type."
+        },
+        {
+          "name": "Focused",
+          "maxLevel": 5,
+          "description": "Increases MP and improves open Insight checks.",
+          "mechanics": "Permanently increase your maximum MP by (SL x 3). On open checks using (INS + INS), receive a bonus equal to (SL)."
+        },
+        {
+          "name": "Knowledge is Power",
+          "maxLevel": 1,
+          "description": "Replaces an accuracy attribute with Insight.",
+          "mechanics": "On Accuracy checks, you can replace one of the weapon's Attribute dice with Insight (e.g., (INS+INS) for a pistol or (INS+MIG) for a waraxe)."
+        },
+        {
+          "name": "Flash of Insight",
+          "maxLevel": 3,
+          "description": "Asks the GM questions after a successful investigation.",
+          "mechanics": "When rolling 13+ on an investigation check (including the Study action), you can ask the GM up to (SL) questions about the investigated target, which they must answer truthfully. This can only be used once per target."
+        },
+        {
+          "name": "Trained Memory",
+          "maxLevel": 1,
+          "description": "Perfectly recalls recent scenes.",
+          "mechanics": "You perfectly recall any scene experienced within the last week, allowing you to mentally revisit it and use Flash of Insight on it."
+        }
+      ]
+    }
+  ]
+}

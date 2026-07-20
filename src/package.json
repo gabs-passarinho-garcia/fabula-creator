@@ -1,0 +1,25 @@
+{
+  "name": "src",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "check": "bunx --bun tsc --noEmit",
+    "start": "bun run index.ts",
+    "build": "bun run scripts/build.ts",
+    "build:linux": "bun build ./index.ts --compile --minify --sourcemap --bytecode --target=bun-linux-x64 --outfile=dist/linux/fabula-creator",
+    "build:windows": "bun build ./index.ts --compile --minify --sourcemap --bytecode --target=bun-windows-x64 --outfile=dist/windows/fabula-creator.exe",
+    "build:bundle": "bun run scripts/build-bundle.ts",
+    "build:bundle:pretty": "bun run scripts/build-bundle.ts --pretty"
+  },
+  "devDependencies": {
+    "@types/bun": "1.3.14",
+    "@types/lodash": "^4.17.24",
+    "typescript": "6.0.3"
+  },
+  "dependencies": {
+    "@clack/prompts": "^1.7.0",
+    "lodash": "^4.18.1",
+    "picocolors": "^1.1.1"
+  }
+}
