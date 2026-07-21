@@ -1,7 +1,7 @@
 {
   "dependencies": {},
   "scripts": {
-    "build": "bun tauri build && bun tauri:windows",
+    "build": "bun tauri:windows && bun tauri:build",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "APPIMAGE_EXTRACT_AND_RUN=1 bun tauri build",
