@@ -1,0 +1,13 @@
+{
+  "dependencies": {},
+  "scripts": {
+    "build": "bun tauri build && bun tauri:windows",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "APPIMAGE_EXTRACT_AND_RUN=1 bun tauri build",
+    "tauri:windows": "bash build-windows.sh"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.11.4"
+  }
+}
