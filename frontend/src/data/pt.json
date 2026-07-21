@@ -1,0 +1,1209 @@
+{
+  "steps": [
+    "Crie a Identidade do personagem.",
+    "Crie ou escolha o Tema do personagem.",
+    "Crie ou escolha a Origem do personagem.",
+    "Escolha uma, duas ou três classes e distribua seus cinco níveis iniciais entre elas.",
+    "Determine o tipo de dado básico dos Atributos (Destreza, Vigor, Astúcia, Vontade).",
+    "Calcule PV, PM, PI, Defesa, Defesa Mágica e Iniciativa.",
+    "Compre equipamentos com 500z e role 2d6 x 10 para dinheiro extra.",
+    "Descreva o personagem, nome e pronomes."
+  ],
+  "identityTables": {
+    "concepts": [
+      "Cavaleiro",
+      "Caçador de recompensa",
+      "Artista marcial",
+      "Caçador de tesouros",
+      "Alienígena",
+      "Sacerdote",
+      "Professor",
+      "Samurai",
+      "Bardo",
+      "Soldado",
+      "Inventor",
+      "Contrabandista",
+      "Autômato",
+      "Ninja",
+      "Diplomata",
+      "Ladrão",
+      "Rei/Rainha",
+      "Mago",
+      "Gladiador",
+      "Nobre"
+    ],
+    "adjectives": [
+      "Encantador",
+      "Perjurador",
+      "Escolhido",
+      "Perturbado",
+      "Corajoso",
+      "Amnésico",
+      "Atraente",
+      "Imperial",
+      "Leal",
+      "Idoso",
+      "Cavalheiresco",
+      "Sorridente",
+      "Influente",
+      "Ranzinza",
+      "Durão",
+      "Jovem",
+      "Excêntrico",
+      "Furtivo",
+      "Famoso",
+      "Não humano"
+    ],
+    "details": [
+      "com sangue antigo",
+      "em fuga",
+      "da Fé Antiga",
+      "buscando justiça",
+      "em desgraça",
+      "das Asas Carmesins",
+      "da Grande Academia",
+      "da lua",
+      "dos Sete Mares",
+      "do futuro",
+      "buscando respostas",
+      "sem terra natal",
+      "do Exército Real",
+      "de outra dimensão",
+      "do passado"
+    ]
+  },
+  "themes": [
+    {
+      "name": "Ambição",
+      "description": "Você busca provar seu valor para si e/ou para os outros."
+    },
+    {
+      "name": "Raiva",
+      "description": "Você é uma bomba-relógio prestes a explodir de raiva."
+    },
+    {
+      "name": "Pertencimento",
+      "description": "Você teme ficar só, ser esquecido ou abandonado."
+    },
+    {
+      "name": "Dúvida",
+      "description": "Você precisa encontrar a resposta para uma pergunta instigante."
+    },
+    {
+      "name": "Dever",
+      "description": "Você vive para cumprir uma promessa ou obedecer a uma ordem."
+    },
+    {
+      "name": "Esperança",
+      "description": "Você quer melhorar o mundo para si e/ou para os outros."
+    }
+  ],
+  "attributes": {
+    "arrays": [
+      {
+        "description": "Especializado",
+        "values": "d10, d10, d6, d6"
+      },
+      {
+        "description": "Mediano",
+        "values": "d10, d8, d8, d6"
+      },
+      {
+        "description": "Pau pra toda obra",
+        "values": "d8, d8, d8, d8"
+      }
+    ]
+  },
+  "startingBudget": 500,
+  "startingEquipment": {
+    "weapons": [
+      {
+        "name": "Rapieira",
+        "type": "melee",
+        "accuracyAttributes": [
+          "DES",
+          "AST"
+        ],
+        "damageBonus": 6,
+        "damageType": "físico",
+        "isEquipped": true
+      }
+    ],
+    "armor": {
+      "name": "Traje de viagem",
+      "baseDefense": 1,
+      "baseMagicDefense": 1,
+      "isEquipped": true
+    }
+  },
+  "equipmentCatalog": {
+    "weapons": [
+      {
+        "name": "Cajado",
+        "cost": 100,
+        "category": "arcane",
+        "type": "melee",
+        "accuracyAttributes": [
+          "VON",
+          "VON"
+        ],
+        "damageBonus": 6,
+        "damageType": "físico",
+        "isEquipped": false
+      },
+      {
+        "name": "Tomo",
+        "cost": 100,
+        "category": "arcane",
+        "type": "melee",
+        "accuracyAttributes": [
+          "AST",
+          "AST"
+        ],
+        "damageBonus": 6,
+        "damageType": "físico",
+        "isEquipped": false
+      },
+      {
+        "name": "Besta",
+        "cost": 150,
+        "category": "ranged",
+        "type": "ranged",
+        "accuracyAttributes": [
+          "DES",
+          "AST"
+        ],
+        "damageBonus": 8,
+        "damageType": "físico",
+        "isEquipped": false
+      },
+      {
+        "name": "Arco curto",
+        "cost": 200,
+        "category": "ranged",
+        "type": "ranged",
+        "accuracyAttributes": [
+          "DES",
+          "DES"
+        ],
+        "damageBonus": 8,
+        "damageType": "físico",
+        "isEquipped": false
+      },
+      {
+        "name": "Ataque desarmado",
+        "cost": 0,
+        "category": "basic-melee",
+        "type": "melee",
+        "accuracyAttributes": [
+          "DES",
+          "VIG"
+        ],
+        "damageBonus": 0,
+        "damageType": "físico",
+        "isEquipped": false
+      },
+      {
+        "name": "Adaga de aço",
+        "cost": 150,
+        "category": "basic-melee",
+        "type": "melee",
+        "accuracyAttributes": [
+          "DES",
+          "AST"
+        ],
+        "damageBonus": 4,
+        "damageType": "físico",
+        "isEquipped": false
+      },
+      {
+        "name": "Pistola",
+        "cost": 250,
+        "category": "ranged",
+        "type": "ranged",
+        "accuracyAttributes": [
+          "DES",
+          "AST"
+        ],
+        "damageBonus": 8,
+        "damageType": "físico",
+        "isEquipped": false
+      },
+      {
+        "name": "Machado de guerra",
+        "cost": 250,
+        "category": "martial-melee",
+        "type": "melee",
+        "accuracyAttributes": [
+          "VIG",
+          "VIG"
+        ],
+        "damageBonus": 14,
+        "damageType": "físico",
+        "isEquipped": false
+      },
+      {
+        "name": "Rapieira",
+        "cost": 200,
+        "category": "martial-melee",
+        "type": "melee",
+        "accuracyAttributes": [
+          "DES",
+          "AST"
+        ],
+        "damageBonus": 6,
+        "damageType": "físico",
+        "isEquipped": false
+      }
+    ],
+    "armors": [
+      {
+        "name": "Traje de viagem",
+        "cost": 100,
+        "category": "light",
+        "baseDefense": 1,
+        "baseMagicDefense": 1,
+        "initiativePenalty": 0,
+        "isEquipped": false
+      },
+      {
+        "name": "Placa rúnica",
+        "cost": 250,
+        "category": "heavy",
+        "baseDefense": 11,
+        "baseMagicDefense": 1,
+        "initiativePenalty": 3,
+        "isEquipped": false
+      }
+    ],
+    "shields": [
+      {
+        "name": "Escudo de bronze",
+        "cost": 100,
+        "category": "martial",
+        "defenseBonus": 2,
+        "magicDefenseBonus": 0,
+        "isEquipped": false
+      },
+      {
+        "name": "Escudo rúnico",
+        "cost": 150,
+        "category": "martial",
+        "defenseBonus": 2,
+        "magicDefenseBonus": 2,
+        "isEquipped": false
+      }
+    ]
+  },
+  "classes": [
+    {
+      "name": "Andarilho",
+      "description": "Explorador que vive pela jornada e aprende com a natureza.",
+      "startingBenefits": [
+        "Aumente permanentemente seus PI máximos em 2."
+      ],
+      "powers": [
+        {
+          "name": "Caçador de Tesouros",
+          "maxLevel": 2,
+          "description": "Vantagem em descobertas durante viagens.",
+          "mechanics": "Quando seu grupo se aventura pelo mapa do mundo, você faz uma descoberta se tirar (NP + 1) ou menos no teste de Viagem (em vez de apenas 1)."
+        },
+        {
+          "name": "Companheiro Fiel",
+          "maxLevel": 5,
+          "description": "Ganha um NPC construto, elemental, fera ou planta de nível 5 como companheiro.",
+          "mechanics": "Com ajuda do grupo, crie um companheiro de nível 5 fixo (não sobe de nível, sem iniciativa própria, no máximo dois ataques básicos). Ele recebe bônus de (NP) em Precisão e Magia, e seus PV máximos são ((NP x dado básico de Vigor do companheiro) + metade do seu nível). Você gasta sua ação para fazê-lo agir no seu turno."
+        },
+        {
+          "name": "Papo de Taverna",
+          "maxLevel": 3,
+          "description": "Descobre informações descansando em estalagens.",
+          "mechanics": "Ao descansar em uma estalagem ou taverna, você pode fazer (NP) perguntas ao mestre sobre os arredores e habitantes. O mestre responde com informações verdadeiras, mas você descreve como as obteve."
+        },
+        {
+          "name": "Prático",
+          "maxLevel": 4,
+          "description": "Recupera PI após testes de Viagem.",
+          "mechanics": "Você recupera (NP) PI após cada teste de Viagem."
+        },
+        {
+          "name": "Viajante Experiente",
+          "maxLevel": 1,
+          "description": "Facilita testes de Viagem.",
+          "mechanics": "Você reduz o dado rolado em seus testes de Viagem em um passo (mínimo d6). Não é cumulativo se mais de um personagem tiver este poder."
+        }
+      ]
+    },
+    {
+      "name": "Arcanista",
+      "description": "Conjurador que invoca avatares mágicos poderosos conhecidos como Arcanos.",
+      "startingBenefits": [
+        "Aumente permanentemente seus PM máximos em 5.",
+        "Pode realizar Rituais de Ritualismo."
+      ],
+      "powers": [
+        {
+          "name": "Arcanismo Ritualista",
+          "maxLevel": 1,
+          "description": "Permite realizar rituais da disciplina arcanismo.",
+          "mechanics": "Você pode fazer rituais de arcanismo, usando (VON + VON) no teste de Magia."
+        },
+        {
+          "name": "Arcano Emergencial",
+          "maxLevel": 6,
+          "description": "Reduz o custo de invocar um Arcano em crise.",
+          "mechanics": "Enquanto estiver em crise, o custo de invocar seu Arcano é reduzido em (NP x 5) PM."
+        },
+        {
+          "name": "Círculo Arcano",
+          "maxLevel": 4,
+          "description": "Lança um feitiço grátis ao dispensar um Arcano.",
+          "mechanics": "Em seu turno, ao dispensar voluntariamente um Arcano que não foi invocado neste turno (com uma arma arcana equipada), você pode fazer a ação Feitiço sem gastar uma ação, desde que o custo total do feitiço seja igual ou inferior a (NP x 5) PM (você ainda paga o custo em PM)."
+        },
+        {
+          "name": "Regeneração Arcana",
+          "maxLevel": 2,
+          "description": "Cura PV ao invocar um Arcano.",
+          "mechanics": "Ao invocar um Arcano, você recupera (NP x 5) PV."
+        },
+        {
+          "name": "Vincular e Invocar",
+          "maxLevel": 1,
+          "description": "Permite vincular e invocar Arcanos.",
+          "mechanics": "Você vincula Arcanos à sua alma para invocá-los depois, gastando uma ação e 40 PM. Ao escolher este poder na criação de personagem, você já começa vinculado a um Arcano à sua escolha."
+        }
+      ]
+    },
+    {
+      "name": "Inventor",
+      "description": "Inventor brilhante focado em engenharia, alquimia e invenções.",
+      "startingBenefits": [
+        "Aumente permanentemente seus PI máximos em 2.",
+        "Você pode iniciar Projetos."
+      ],
+      "powers": [
+        {
+          "name": "Chuva de Poções",
+          "maxLevel": 2,
+          "description": "Faz uma poção de cura afetar mais alvos.",
+          "mechanics": "Quando cria uma poção de cura de alvo único, ela pode afetar até (NP) criaturas adicionais, mas cada uma recupera apenas metade do valor normal."
+        },
+        {
+          "name": "Engenhocas",
+          "maxLevel": 5,
+          "description": "Desbloqueia tipos de invenção (alquimia, infusões, tecnomagia).",
+          "mechanics": "Na primeira aquisição, escolha um tipo de engenhoca e ganhe seus benefícios básicos. Nas aquisições seguintes, escolha entre desbloquear um novo tipo, os benefícios avançados de um tipo já possuído, ou os superiores de um tipo cujo avançado já possua."
+        },
+        {
+          "name": "Fórmula Secreta",
+          "maxLevel": 5,
+          "description": "Aumenta a cura e o dano de itens criados.",
+          "mechanics": "Poções e magisferas que restauram PV/PM restauram (NP x 5) pontos a mais; fragmentos elementais, magisferas ou poções de dano causam (NP) de dano adicional."
+        },
+        {
+          "name": "Item Emergencial",
+          "maxLevel": 1,
+          "description": "Ação extra em crise para usar itens.",
+          "mechanics": "Uma vez por cena de conflito, quando estiver em crise, você pode fazer uma ação adicional no turno, desde que seja a ação Inventário."
+        },
+        {
+          "name": "Visionário",
+          "maxLevel": 5,
+          "description": "Acelera Projetos em andamento.",
+          "mechanics": "Ao trabalhar num Projeto, até (NP x 100) zênites do custo de material são pagos automaticamente, e você gera (NP) de progresso extra por dia. Efeitos de múltiplos personagens com este poder se acumulam."
+        }
+      ]
+    },
+    {
+      "name": "Atirador",
+      "description": "Excepcional em lidar com ameaças à distância.",
+      "startingBenefits": [
+        "Aumente permanentemente seus PV máximos em 5.",
+        "Pode equipar armas à distância e escudos marciais."
+      ],
+      "powers": [
+        {
+          "name": "Barragem",
+          "maxLevel": 1,
+          "description": "Gasta PM para dar Multi a um ataque à distância.",
+          "mechanics": "Ao fazer um ataque à distância, gaste 10 PM para escolher: o ataque ganha multi (2); ou aumenta em +1 a propriedade multi já existente, até o máximo de multi (3)."
+        },
+        {
+          "name": "Fogo Cruzado",
+          "maxLevel": 1,
+          "description": "Anula ataques à distância inimigos gastando PM.",
+          "mechanics": "Quando uma criatura visível faz um ataque à distância, você pode gastar PM igual a (5 + o teste de Precisão do atacante) para fazer esse ataque falhar automaticamente contra todos os alvos, desde que tenha uma arma à distância equipada. Não funciona contra sucesso crítico."
+        },
+        {
+          "name": "Maestria com Armas à Distância",
+          "maxLevel": 4,
+          "description": "Bônus permanente em Precisão à distância.",
+          "mechanics": "Você recebe um bônus igual a (NP) em testes de Precisão com armas à distância."
+        },
+        {
+          "name": "Olhos de Águia",
+          "maxLevel": 5,
+          "description": "Recompensa por fazer Guarda sem dar cobertura.",
+          "mechanics": "Ao fazer a ação Guarda sem escolher dar cobertura a ninguém, você pode: fazer seu próximo ataque à distância na cena causar (NP x 3) de dano adicional; ou fazer um ataque livre com arco ou arma de fogo equipada, considerando sua RA como 0."
+        },
+        {
+          "name": "Tiro de Aviso",
+          "maxLevel": 4,
+          "description": "Troca o dano do ataque por um efeito de controle.",
+          "mechanics": "Após acertar um ataque à distância, você pode abrir mão do dano e escolher: o(s) alvo(s) atingido(s) fica(m) abalado; ou lento; ou perde(m) (NP x 10) PM."
+        }
+      ]
+    },
+    {
+      "name": "Elementalista",
+      "description": "Usa o poder destrutivo dos elementos da natureza.",
+      "startingBenefits": [
+        "Aumente permanentemente seus PM máximos em 5.",
+        "Pode fazer rituais de Ritualismo."
+      ],
+      "powers": [
+        {
+          "name": "Artilharia Mágica",
+          "maxLevel": 3,
+          "description": "Bônus em Magia ao usar arma arcana.",
+          "mechanics": "Ao lançar um feitiço ofensivo com uma arma arcana equipada, você recebe um bônus igual a (NP x 2) no teste de Magia."
+        },
+        {
+          "name": "Cataclismo",
+          "maxLevel": 3,
+          "description": "Aumenta o custo do feitiço para causar mais dano.",
+          "mechanics": "Ao lançar um feitiço instantâneo com arma arcana equipada, você pode aumentar o custo total em até (NP x 10) PM; a cada 10 PM extras gastos assim, o feitiço causa 5 pontos de dano adicional."
+        },
+        {
+          "name": "Elementalismo Ritualista",
+          "maxLevel": 1,
+          "description": "Permite rituais da disciplina elementalismo.",
+          "mechanics": "Você pode fazer rituais de elementalismo, usando (AST + VON) no teste de Magia."
+        },
+        {
+          "name": "Lâmina Mágica",
+          "maxLevel": 4,
+          "description": "Lança feitiços através de armas não arcanas.",
+          "mechanics": "Ao lançar um feitiço ofensivo de alvo único com custo total até (NP x 20) PM, você pode usar uma arma equipada não arcana: o teste de Magia usa a mesma fórmula de Precisão da arma, com bônus de (NP) se a fórmula incluir Destreza."
+        },
+        {
+          "name": "Magia Elemental",
+          "maxLevel": 10,
+          "description": "Aprende feitiços de Elementalista.",
+          "mechanics": "A cada nível, aprenda um feitiço de Elementalista. Feitiços ofensivos de Elementalista usam (AST + VON) no teste de Magia.",
+          "grantsSpell": true
+        }
+      ],
+      "spells": [
+        {
+          "name": "Arma Elemental",
+          "pmCost": "10",
+          "target": "Uma arma",
+          "duration": "Cena",
+          "isOffensive": false,
+          "mechanics": "Você imbui uma arma equipada de criatura voluntária com energia elemental. Escolha um tipo de dano: ar, fogo, gelo, raio ou terra. Enquanto o feitiço durar, todo o dano causado pela arma torna-se do tipo escolhido. Se estiver com essa arma equipada ao lançar, pode fazer um ataque livre com ela como parte da mesma ação."
+        },
+        {
+          "name": "Clarão",
+          "pmCost": "20",
+          "target": "Uma criatura",
+          "duration": "Instantânea",
+          "isOffensive": true,
+          "mechanics": "Você canaliza um raio de fogo tão quente que supera as defesas do alvo, causando (RA + 25) pontos de dano de fogo (este dano ignora Resistências)."
+        },
+        {
+          "name": "Fulgur",
+          "pmCost": "10 × A",
+          "target": "Até três criaturas",
+          "duration": "Instantânea",
+          "isOffensive": true,
+          "mechanics": "Você manipula eletricidade em uma onda de raios, causando (RA + 15) pontos de dano de raio a cada alvo. Oportunidade: alvos atingidos também ficam atordoados."
+        },
+        {
+          "name": "Glacies",
+          "pmCost": "10 × A",
+          "target": "Até três criaturas",
+          "duration": "Instantânea",
+          "isOffensive": true,
+          "mechanics": "Você cobre os adversários com gelo denso, causando (RA + 15) pontos de dano de gelo a cada alvo. Oportunidade: alvos atingidos também ficam lentos."
+        },
+        {
+          "name": "Golpe de Sobrevoo",
+          "pmCost": "10",
+          "target": "Pessoal",
+          "duration": "Instantânea",
+          "isOffensive": false,
+          "mechanics": "O vento carrega seus ataques pelo campo de batalha. Faça um ataque livre com uma arma corpo a corpo equipada, podendo atingir alvos voadores. Se usou espada, lança ou luta, o ataque causa 5 pontos de dano adicional. Um alvo voador atingido é forçado a pousar."
+        },
+        {
+          "name": "Iceberg",
+          "pmCost": "20",
+          "target": "Uma criatura",
+          "duration": "Instantânea",
+          "isOffensive": true,
+          "mechanics": "Um pilar mágico de gelo baixa a temperatura do alvo a um nível crítico, causando (RA + 25) pontos de dano de gelo (este dano ignora Resistências)."
+        },
+        {
+          "name": "Ignis",
+          "pmCost": "10 × A",
+          "target": "Até três criaturas",
+          "duration": "Instantânea",
+          "isOffensive": true,
+          "mechanics": "Você conjura chamas no ar e libera uma chuva de fogo, causando (RA + 15) pontos de dano de fogo a cada alvo. Oportunidade: cada alvo atingido fica abalado."
+        },
+        {
+          "name": "Mortalha Elemental",
+          "pmCost": "5 × A",
+          "target": "Até três criaturas",
+          "duration": "Cena",
+          "isOffensive": false,
+          "mechanics": "Você protege os alvos contra a fúria dos elementos. Escolha um tipo de dano: ar, fogo, gelo, raio ou terra. Enquanto o feitiço durar, cada alvo se torna Resistente ao tipo de dano escolhido."
+        },
+        {
+          "name": "Pedregulho",
+          "pmCost": "20",
+          "target": "Uma criatura",
+          "duration": "Instantânea",
+          "isOffensive": true,
+          "mechanics": "Você invoca uma rocha colossal contra o inimigo, causando (RA + 25) pontos de dano de terra (este dano ignora Resistências)."
+        },
+        {
+          "name": "Raio",
+          "pmCost": "20",
+          "target": "Uma criatura",
+          "duration": "Instantânea",
+          "isOffensive": true,
+          "mechanics": "Você lança um relâmpago contra o adversário, causando (RA + 25) pontos de dano de raio (este dano ignora Resistências)."
+        },
+        {
+          "name": "Terra",
+          "pmCost": "10 × A",
+          "target": "Até três criaturas",
+          "duration": "Instantânea",
+          "isOffensive": true,
+          "mechanics": "Pináculos de rocha cercam os inimigos, causando (RA + 15) pontos de dano de terra a cada alvo (não pode alvejar criaturas voando ou suspensas no ar). Oportunidade: alvos atingidos fazem uma ação a menos no próximo turno (mínimo zero)."
+        },
+        {
+          "name": "Ventus",
+          "pmCost": "10 × A",
+          "target": "Até três criaturas",
+          "duration": "Instantânea",
+          "isOffensive": true,
+          "mechanics": "Você invoca o poder dos ventos, causando (RA + 15) pontos de dano de ar a cada alvo. Oportunidade: alvos voadores atingidos são forçados a pousar."
+        },
+        {
+          "name": "Vórtice",
+          "pmCost": "20",
+          "target": "Uma criatura",
+          "duration": "Cena",
+          "isOffensive": true,
+          "mechanics": "Você ataca o inimigo com ventos de alta pressão, causando (RA + 25) pontos de dano de ar (este dano ignora Resistências)."
+        }
+      ]
+    },
+    {
+      "name": "Entropista",
+      "description": "Mago caótico que manipula a probabilidade, o tempo e o espaço.",
+      "startingBenefits": [
+        "Aumente permanentemente seus PM máximos em 5.",
+        "Pode fazer rituais de Ritualismo."
+      ],
+      "powers": [
+        {
+          "name": "Absorver PM",
+          "maxLevel": 5,
+          "description": "Recupera PM ao sofrer dano.",
+          "mechanics": "Depois de sofrer dano, você recupera (NP x 2) PM."
+        },
+        {
+          "name": "Entropismo Ritualista",
+          "maxLevel": 1,
+          "description": "Permite rituais da disciplina entropismo.",
+          "mechanics": "Você pode fazer rituais de entropismo, usando (AST + VON) no teste de Magia."
+        },
+        {
+          "name": "Magia Entrópica",
+          "maxLevel": 10,
+          "description": "Aprende feitiços de Entropista.",
+          "mechanics": "A cada nível, aprenda um feitiço de Entropista. Feitiços ofensivos de Entropista usam (AST + VON) no teste de Magia.",
+          "grantsSpell": true
+        },
+        {
+          "name": "Sete da Sorte",
+          "maxLevel": 1,
+          "description": "Substitui o resultado de um dado pelo seu número da sorte.",
+          "mechanics": "Você tem um número da sorte (começa em 7 a cada sessão). Uma vez por cena, após um teste, pode trocar o valor de um dado rolado pelo número da sorte, mesmo se o resultado for impossível. O valor substituído vira seu novo número da sorte."
+        },
+        {
+          "name": "Tempo Roubado",
+          "maxLevel": 4,
+          "description": "Manipula o tempo em combate gastando PM.",
+          "mechanics": "Em um conflito, gaste uma ação e até (NP x 5) PM. Para cada 5 PM: deixe uma criatura lenta, ou remova essa condição; ou dê a ação Equipamento grátis; ou tire (10 + NP x 5) PV de um inimigo lento; ou faça um aliado que ainda não agiu jogar o turno logo após o seu."
+        }
+      ],
+      "spells": [
+        {
+          "name": "Aceleração",
+          "pmCost": "20",
+          "target": "Uma criatura",
+          "duration": "Cena",
+          "isOffensive": false,
+          "mechanics": "No final de cada um dos turnos do alvo, ele pode escolher: fazer um ataque livre com a arma equipada; ou fazer a ação Feitiço sem gastar uma ação, lançando um feitiço de custo total até 10 PM (pagando o custo). O feitiço termina quando o alvo usa esse efeito uma segunda vez."
+        },
+        {
+          "name": "Anomalia",
+          "pmCost": "20",
+          "target": "Uma criatura",
+          "duration": "Cena",
+          "isOffensive": true,
+          "mechanics": "Você altera a essência natural do alvo. Enquanto o feitiço durar, se o alvo fosse sofrer dano de um tipo ao qual é Absorvedor ou Imune, em vez disso é considerado Vulnerável. Quando isso acontecer, o feitiço termina."
+        },
+        {
+          "name": "Apostar",
+          "pmCost": "até 20",
+          "target": "Especial",
+          "duration": "Instantânea",
+          "isOffensive": false,
+          "mechanics": "Você invoca um vórtice de energia caótica. Role seu dado atual de Vontade uma vez para cada 10 PM gastos e escolha um resultado, que determina o efeito: 1) você perde metade dos PV e PM atuais; 2-3) todas as criaturas na cena, incluindo você, ficam envenenadas; 4-6) todas ficam lentas; 7-8) escolha até três criaturas, cada uma recupera 50 PV e todas as condições; 9+) escolha criaturas visíveis e cause 30 pontos de dano (tipo definido por d6: 1-ar, 2-raio, 3-trevas, 4-terra, 5-fogo, 6-veneno)."
+        },
+        {
+          "name": "Arma das Trevas",
+          "pmCost": "5",
+          "target": "Uma arma equipada",
+          "duration": "Cena",
+          "isOffensive": false,
+          "mechanics": "Você imbui a arma com energia das trevas. Enquanto durar, o dano causado pela arma torna-se de trevas. Se estiver com essa arma equipada ao lançar, pode fazer um ataque livre com ela como parte da mesma ação."
+        },
+        {
+          "name": "Dissipar",
+          "pmCost": "10",
+          "target": "Uma criatura",
+          "duration": "Instantânea",
+          "isOffensive": false,
+          "mechanics": "Você remove toda magia de uma criatura. Se o alvo estiver sob efeito de um ou mais feitiços com duração 'Cena', esses efeitos terminam."
+        },
+        {
+          "name": "Drenar Espírito",
+          "pmCost": "5",
+          "target": "Uma criatura",
+          "duration": "Instantânea",
+          "isOffensive": true,
+          "mechanics": "Você consome a psique de uma criatura. O alvo perde (RA + 20) PM. Você recupera PM igual à metade dos PM perdidos pelo alvo (se o alvo não tiver mais PM, você não recupera)."
+        },
+        {
+          "name": "Drenar Vigor",
+          "pmCost": "10",
+          "target": "Uma criatura",
+          "duration": "Instantânea",
+          "isOffensive": true,
+          "mechanics": "Você rouba a força vital do alvo, causando (RA + 15) pontos de dano de trevas. Você recupera PV igual à metade da perda de PV causada (se o alvo não tiver mais PV, você não recupera)."
+        },
+        {
+          "name": "Divinação",
+          "pmCost": "10",
+          "target": "Pessoal",
+          "duration": "Cena",
+          "isOffensive": false,
+          "mechanics": "Você tem um vislumbre do futuro. Enquanto durar, quando uma criatura visível fizer um teste que não seja falha ou sucesso crítico, você pode forçá-la a rolar ambos os dados novamente. O feitiço termina após forçar duas novas rolagens."
+        },
+        {
+          "name": "Espelhar",
+          "pmCost": "10",
+          "target": "Uma criatura",
+          "duration": "Cena",
+          "isOffensive": false,
+          "mechanics": "Você distorce as leis mágicas. Enquanto durar, se um feitiço ofensivo for lançado contra o alvo, quem o lançou se torna o alvo em seu lugar (outros alvos são escolhidos normalmente). Quando isso acontecer, o feitiço termina."
+        },
+        {
+          "name": "Parar",
+          "pmCost": "10",
+          "target": "Uma criatura",
+          "duration": "Instantânea",
+          "isOffensive": true,
+          "mechanics": "Você aprisiona o adversário em um círculo de tempo e espaço alterados. O alvo faz uma ação a menos no próximo turno dele (mínimo de 0 ação)."
+        },
+        {
+          "name": "Umbra",
+          "pmCost": "10 × A",
+          "target": "Até três criaturas",
+          "duration": "Instantânea",
+          "isOffensive": true,
+          "mechanics": "Uma tempestade de energia das trevas transforma matéria em cinzas, causando (RA + 15) pontos de dano de trevas a cada alvo. Oportunidade: alvos atingidos também ficam fracos."
+        },
+        {
+          "name": "Ômega",
+          "pmCost": "15",
+          "target": "Uma criatura",
+          "duration": "Instantânea",
+          "isOffensive": true,
+          "mechanics": "Você invoca a ruína contra o adversário, transformando força em fraqueza. O alvo perde uma quantidade de PV igual a (20 + metade do nível do alvo)."
+        }
+      ]
+    },
+    {
+      "name": "Espiritualista",
+      "description": "Conectado à energia vital e almas, focado em suporte, cura e luz.",
+      "startingBenefits": [
+        "Aumente permanentemente seus PM máximos em 5.",
+        "Pode fazer rituais de Ritualismo."
+      ],
+      "powers": [
+        {
+          "name": "Espiritualismo Ritualista",
+          "maxLevel": 1,
+          "description": "Permite rituais da disciplina espiritualismo.",
+          "mechanics": "Você pode fazer rituais de espiritualismo, usando (AST + VON) no teste de Magia."
+        },
+        {
+          "name": "Magia de Suporte",
+          "maxLevel": 1,
+          "description": "Concede bônus a um aliado com Laço ao lançar magia de apoio.",
+          "mechanics": "Ao lançar um feitiço com alvo aliado usando uma arma arcana equipada, escolha um alvo com quem tenha um Laço: ele recebe um bônus igual à força do Laço no próximo teste que fizer até o fim da cena."
+        },
+        {
+          "name": "Magia Espiritual",
+          "maxLevel": 10,
+          "description": "Aprende feitiços de Espiritualista.",
+          "mechanics": "A cada nível, aprenda um feitiço de Espiritualista. Feitiços ofensivos de Espiritualista usam (AST + VON) no teste de Magia.",
+          "grantsSpell": true
+        },
+        {
+          "name": "Poder Curativo",
+          "maxLevel": 2,
+          "description": "Aumenta a cura de feitiços de suporte.",
+          "mechanics": "Ao lançar um feitiço com alvo aliado usando arma arcana equipada, cada aliado alvo recupera (3 + (NP x número de Laços que você tem)) PV, além da cura do feitiço."
+        },
+        {
+          "name": "Vismagus",
+          "maxLevel": 1,
+          "description": "Paga o custo de feitiços com PV em vez de PM.",
+          "mechanics": "Se não tiver PM suficiente para um feitiço, pode gastar PV igual a (10 + o custo total em PM) em vez disso. Se o feitiço curaria PV, esse efeito não se aplica a você."
+        }
+      ],
+      "spells": [
+        {
+          "name": "Alucinação",
+          "pmCost": "5 × A",
+          "target": "Até três criaturas",
+          "duration": "Instantânea",
+          "isOffensive": true,
+          "mechanics": "Você altera os sentidos dos inimigos com alucinações bizarras. Escolha abalado ou atordoado: cada alvo atingido é afligido pela condição escolhida."
+        },
+        {
+          "name": "Arma Espiritual",
+          "pmCost": "5",
+          "target": "Uma arma equipada",
+          "duration": "Cena",
+          "isOffensive": false,
+          "mechanics": "Você imbui a arma com a energia purificadora de seu espírito. Enquanto durar, o dano causado pela arma torna-se do tipo luz. Se estiver com a arma equipada ao lançar, pode fazer um ataque livre com ela como parte da mesma ação."
+        },
+        {
+          "name": "Aura",
+          "pmCost": "5 × A",
+          "target": "Até três criaturas",
+          "duration": "Cena",
+          "isOffensive": false,
+          "mechanics": "Você projeta a alma para fora do corpo, protegendo os alvos de magias perigosas. Enquanto durar, a Defesa Mágica dos alvos se torna 12 (um alvo ainda pode usar a própria Def.M se for maior). No 20° nível esse valor sobe para 13; no 40°, para 14."
+        },
+        {
+          "name": "Barreira",
+          "pmCost": "5 × A",
+          "target": "Até três criaturas",
+          "duration": "Cena",
+          "isOffensive": false,
+          "mechanics": "Você projeta a alma para fora do corpo como uma barreira contra ataques. Enquanto durar, a Defesa dos alvos se torna 12 (um alvo ainda pode usar a própria Defesa se for maior). No 20° nível sobe para 13; no 40°, para 14."
+        },
+        {
+          "name": "Bastião Espiritual",
+          "pmCost": "5 × A",
+          "target": "Até três criaturas",
+          "duration": "Cena",
+          "isOffensive": false,
+          "mechanics": "Você protege os alvos com energia mágica. Escolha um tipo de dano entre luz, trevas ou veneno. Enquanto durar, cada alvo se torna Resistente ao dano escolhido."
+        },
+        {
+          "name": "Curar",
+          "pmCost": "10 × A",
+          "target": "Até três criaturas",
+          "duration": "Instantânea",
+          "isOffensive": false,
+          "mechanics": "Você revigora seus companheiros, aliviando dores e curando fadiga. Cada alvo recupera 40 PV (50 no 20° nível, 60 no 40° nível)."
+        },
+        {
+          "name": "Despertar",
+          "pmCost": "20",
+          "target": "Uma criatura",
+          "duration": "Cena",
+          "isOffensive": false,
+          "mechanics": "Você permite que uma criatura concentre sua energia vital. Escolha um Atributo: Destreza, Vigor, Astúcia ou Vontade. Enquanto durar, o alvo considera o dado desse Atributo um passo maior (máximo d12)."
+        },
+        {
+          "name": "Enfurecer",
+          "pmCost": "10",
+          "target": "Uma criatura",
+          "duration": "Instantânea",
+          "isOffensive": true,
+          "mechanics": "Você faz uma criatura perder a compostura e agir em total descontrole. O alvo fica enfurecido e não pode fazer Guarda ou Feitiço até o fim do próximo turno dele."
+        },
+        {
+          "name": "Lux",
+          "pmCost": "10 × A",
+          "target": "Até três criaturas",
+          "duration": "Instantânea",
+          "isOffensive": true,
+          "mechanics": "Você foca sua energia interior em uma barragem de raios solares cegantes, causando (RA + 15) pontos de dano de luz a cada alvo. Oportunidade: alvos atingidos também ficam atordoados."
+        },
+        {
+          "name": "Piedade",
+          "pmCost": "20",
+          "target": "Uma criatura",
+          "duration": "Cena",
+          "isOffensive": false,
+          "mechanics": "Você fortalece a coragem de uma criatura contra sofrimento e desespero. Enquanto durar, se o alvo fosse ficar com 0 PV, em vez disso fica com exatamente 1 PV. Quando isso acontecer, o feitiço termina."
+        },
+        {
+          "name": "Purificar",
+          "pmCost": "5 × A",
+          "target": "Até três criaturas",
+          "duration": "Instantânea",
+          "isOffensive": false,
+          "mechanics": "Você fortifica e purifica a energia da alma de seus companheiros. Todos os alvos se recuperam de todas as condições."
+        },
+        {
+          "name": "Reforçar",
+          "pmCost": "5 × A",
+          "target": "Até três criaturas",
+          "duration": "Cena",
+          "isOffensive": false,
+          "mechanics": "Você protege os alvos contra efeitos que corromperiam corpo e espírito. Escolha abalado, atordoado, enfurecido, envenenado, fraco ou lento. Enquanto durar, cada alvo se torna imune à condição escolhida."
+        },
+        {
+          "name": "Torpor",
+          "pmCost": "5 × A",
+          "target": "Até três criaturas",
+          "duration": "Instantânea",
+          "isOffensive": true,
+          "mechanics": "Você sufoca a energia da alma dos adversários, dificultando seus movimentos. Escolha fraco ou lento: cada alvo atingido é afligido pela condição escolhida."
+        }
+      ]
+    },
+    {
+      "name": "Furioso",
+      "description": "Combatente implacável impulsionado pela ira e adrenalina.",
+      "startingBenefits": [
+        "Aumente permanentemente seus PV máximos em 5.",
+        "Pode equipar armas de corpo a corpo e armaduras marciais."
+      ],
+      "powers": [
+        {
+          "name": "Adrenalina",
+          "maxLevel": 5,
+          "description": "Dano extra enquanto em crise.",
+          "mechanics": "Enquanto estiver em crise, você causa (NP x 2) de dano adicional, por qualquer meio (ataques, feitiços, Arcanos, itens etc)."
+        },
+        {
+          "name": "Espírito Indomável",
+          "maxLevel": 4,
+          "description": "Ganha um benefício extra ao gastar Pontos de Fabula.",
+          "mechanics": "Ao gastar um ou mais Pontos de Fabula, escolha um: recupera (NP x 5) PV; ou (NP x 5) PM; ou remove uma condição."
+        },
+        {
+          "name": "Frenesi",
+          "maxLevel": 1,
+          "description": "Chance extra de sucesso crítico com armas específicas.",
+          "mechanics": "Testes de Precisão com adaga, luta, malho ou armas de arremesso contam como sucesso crítico se os dois dados mostrarem o mesmo número (desde que não seja falha crítica)."
+        },
+        {
+          "name": "Provocar",
+          "maxLevel": 5,
+          "description": "Força um inimigo a focar ataques em você.",
+          "mechanics": "Gaste uma ação e 5 PM para fazer um teste oposto de (VIG + VON) contra uma criatura visível. Se passar, ela fica enfurecida e compelida a te atacar. Você recebe bônus de (NP) neste teste."
+        },
+        {
+          "name": "Resistir",
+          "maxLevel": 5,
+          "description": "Cura PV e melhora um Atributo ao fazer Guarda.",
+          "mechanics": "Ao fazer Guarda sem dar cobertura a ninguém, recupere PV igual a (NP x a maior força de Laço que tiver) e escolha Vigor ou Vontade: até o fim do próximo turno, o dado atual desse Atributo sobe um passo (máximo d12)."
+        }
+      ]
+    },
+    {
+      "name": "Guardião",
+      "description": "Muralha defensiva dedicada a proteger companheiros.",
+      "startingBenefits": [
+        "Aumente permanentemente seus PV máximos em 5.",
+        "Pode equipar armaduras e escudos marciais."
+      ],
+      "powers": [
+        {
+          "name": "Duplo Escudeiro",
+          "maxLevel": 1,
+          "description": "Equipa dois escudos como uma arma de duas mãos.",
+          "mechanics": "Você pode equipar um segundo escudo na mão dominante. Com dois escudos equipados, ganha os benefícios de ambos e pode atacar com eles como arma de duas mãos 'Escudos Gêmeos' (VIG+VIG, RA+5 físico), causando dano adicional igual ao NP em Maestria Defensiva."
+        },
+        {
+          "name": "Fortaleza",
+          "maxLevel": 5,
+          "description": "Aumenta PV máximos permanentemente.",
+          "mechanics": "Aumente permanentemente seus PV máximos em (NP x 3)."
+        },
+        {
+          "name": "Guarda-Costas",
+          "maxLevel": 1,
+          "description": "Protege um aliado ao fazer Guarda.",
+          "mechanics": "Ao fazer Guarda dando cobertura a um aliado, essa criatura se torna Resistente a todos os tipos de dano até o início do seu próximo turno."
+        },
+        {
+          "name": "Maestria Defensiva",
+          "maxLevel": 5,
+          "description": "Reduz dano sofrido com escudo/armadura marcial.",
+          "mechanics": "Enquanto tiver um escudo ou armadura marcial equipada, todo dano sofrido é reduzido em (NP), aplicado antes de Afinidades a dano."
+        },
+        {
+          "name": "Proteger",
+          "maxLevel": 1,
+          "description": "Assume o perigo no lugar de um aliado.",
+          "mechanics": "Quando outra criatura é ameaçada por um ataque, feitiço ou perigo, você pode tomar o lugar dela: os testes envolvidos passam a ser feitos contra você. Não pode ser reusado até o início do seu próximo turno em conflito."
+        }
+      ]
+    },
+    {
+      "name": "Ladino",
+      "description": "Oportunista ágil, mestre do roubo e de aproveitar a fraqueza inimiga.",
+      "startingBenefits": [
+        "Aumente permanentemente seus PI máximos em 2."
+      ],
+      "powers": [
+        {
+          "name": "Alta Velocidade",
+          "maxLevel": 3,
+          "description": "Age antes da primeira rodada do conflito.",
+          "mechanics": "No início de um conflito, gaste 10 PM para, antes da primeira rodada, fazer um ataque livre com arma equipada ou a ação Impedimento/Objetivo, com bônus de (NP) nos testes envolvidos."
+        },
+        {
+          "name": "Esquiva",
+          "maxLevel": 3,
+          "description": "Aumenta a Defesa sem armadura/escudo marcial.",
+          "mechanics": "Enquanto não tiver escudo ou armadura marcial equipados, sua Defesa aumenta em (NP)."
+        },
+        {
+          "name": "Golpe Baixo",
+          "maxLevel": 5,
+          "description": "Dano extra contra alvos únicos com status negativos.",
+          "mechanics": "Ao acertar um ataque cujo único alvo esteja sofrendo uma ou mais condições, você causa dano adicional igual a (NP + número de condições que o alvo tem)."
+        },
+        {
+          "name": "Roubo de Alma",
+          "maxLevel": 5,
+          "description": "Rouba PI ou itens de inimigos derrotados.",
+          "mechanics": "Uma vez por criatura, gaste uma ação para testar (DES + VON) contra a Defesa Mágica de um inimigo visível: contra um soldado, recupere (NP) PI; contra um elite/campeão, ganhe um item cujo valor é o nível do alvo x 30 (ou x50 se vilão). Bônus de (NP) neste teste."
+        },
+        {
+          "name": "Vejo Você Mais Tarde",
+          "maxLevel": 1,
+          "description": "Some da cena e reaparece em outro lugar.",
+          "mechanics": "Gaste uma ação e 1 Ponto de Fabula para desaparecer da cena atual e reaparecer quando quiser em outra cena com outro PJ."
+        }
+      ]
+    },
+    {
+      "name": "Guerreiro Sombrio",
+      "description": "Guerreiro amaldiçoado que sacrifica a própria vida para causar danos massivos.",
+      "startingBenefits": [
+        "Aumente permanentemente seus PV máximos em 5.",
+        "Pode equipar armas e armaduras marciais de corpo a corpo."
+      ],
+      "powers": [
+        {
+          "name": "Agonia",
+          "maxLevel": 5,
+          "description": "Cura PV e PM ao ferir inimigos com Laço.",
+          "mechanics": "Uma vez por turno (inclusive turnos alheios), após causar dano a um inimigo com quem tenha Laço, recupere (NP x 2) PV e (NP x 2) PM."
+        },
+        {
+          "name": "Coração da Escuridão",
+          "maxLevel": 1,
+          "description": "Cria um Laço de ódio ao entrar em crise.",
+          "mechanics": "Uma vez por cena, ao entrar em crise, escolha uma criatura visível com quem não tenha Laço e crie um Laço de ódio com ela."
+        },
+        {
+          "name": "Golpe das Sombras",
+          "maxLevel": 5,
+          "description": "Sacrifica PV para um ataque com dano de trevas extra.",
+          "mechanics": "Gaste uma ação: role seu dado de Vigor e perca PV igual ao resultado (se não zerar seus PV, prossiga). Faça um ataque livre; se acertar, cause dano adicional de trevas igual a (NP + o valor rolado no dado de Vigor). O tipo de dano não pode ser alterado."
+        },
+        {
+          "name": "Lição Dolorosa",
+          "maxLevel": 3,
+          "description": "Estuda o inimigo que acabou de feri-lo.",
+          "mechanics": "Quando sofrer perda de PV, pode fazer a ação Estudo imediatamente contra quem causou o dano, com bônus de (NP) no teste."
+        },
+        {
+          "name": "Sangue das Trevas",
+          "maxLevel": 1,
+          "description": "Resistência a trevas e veneno em crise.",
+          "mechanics": "Enquanto estiver em crise, você tem Resistência a dano de trevas e de veneno."
+        }
+      ]
+    },
+    {
+      "name": "Mestre de Armas",
+      "description": "Especialista inigualável no combate corpo a corpo e posturas.",
+      "startingBenefits": [
+        "Aumente permanentemente seus PV máximos em 5.",
+        "Pode equipar armas marciais de corpo a corpo e escudos marciais."
+      ],
+      "powers": [
+        {
+          "name": "Chuva de Lâminas",
+          "maxLevel": 1,
+          "description": "Gasta PM para dar Multi a um ataque corpo a corpo.",
+          "mechanics": "Ao fazer um ataque corpo a corpo, gaste 10 PM para escolher: o ataque ganha multi (2); ou aumenta em +1 a propriedade multi já existente, até o máximo de multi (3)."
+        },
+        {
+          "name": "Contra-Ataque",
+          "maxLevel": 1,
+          "description": "Revida um ataque corpo a corpo inimigo.",
+          "mechanics": "Quando um inimigo acerta ou erra um ataque corpo a corpo contra você e o resultado do teste de Precisão dele for par, você pode fazer um ataque livre corpo a corpo contra esse inimigo (RA considerada 0 para o dano)."
+        },
+        {
+          "name": "Quebra-Ossos",
+          "maxLevel": 4,
+          "description": "Troca o dano do ataque por um efeito de controle.",
+          "mechanics": "Ao acertar um ataque corpo a corpo, abra mão do dano para escolher: o(s) alvo(s) fica(m) atordoado(s); ou fraco(s); ou perde(m) (NP x 10) PM."
+        },
+        {
+          "name": "Maestria com Armas Corpo a Corpo",
+          "maxLevel": 4,
+          "description": "Bônus permanente em Precisão corpo a corpo.",
+          "mechanics": "Você recebe um bônus igual a (NP) em testes de Precisão corpo a corpo."
+        },
+        {
+          "name": "Trespassar",
+          "maxLevel": 3,
+          "description": "Ataque especial que destrói equipamento ou causa dano contínuo.",
+          "mechanics": "Gaste uma ação e 5 PM para um ataque livre corpo a corpo de alvo único, sem causar dano; se acertar, escolha: destruir o escudo do alvo; ou destruir a armadura dele; ou fazer com que ele sofra (NP x 2) de dano adicional de todas as fontes até seu próximo turno."
+        }
+      ]
+    },
+    {
+      "name": "Orador",
+      "description": "Diplomata capaz de manipular aliados e inimigos com palavras.",
+      "startingBenefits": [
+        "Aumente permanentemente seus PM máximos em 5."
+      ],
+      "powers": [
+        {
+          "name": "Aliado Inesperado",
+          "maxLevel": 1,
+          "description": "Torna uma criatura solícita gastando Fabula.",
+          "mechanics": "Gaste uma ação e 1 Ponto de Fabula para escolher uma criatura não hostil que possa ouvi-lo; ela se torna solícita, desde que tratada com respeito e pedidos razoáveis."
+        },
+        {
+          "name": "Condenar",
+          "maxLevel": 4,
+          "description": "Debuffa um inimigo com um teste social oposto.",
+          "mechanics": "Gaste uma ação e 5 PM para um teste oposto de (AST + VON) contra um inimigo que o ouça. Em sucesso, ele perde (NP x 10) PM e fica abalado ou atordoado (à sua escolha), além de sofrer (NP) de dano adicional de todas as fontes até seu próximo turno. Bônus de (NP) neste teste."
+        },
+        {
+          "name": "Confio em Você",
+          "maxLevel": 2,
+          "description": "Empresta seus Traços/Laços a um aliado.",
+          "mechanics": "Quando um PJ que o ouça fizer um teste, gaste 1 Ponto de Fabula para emprestar um dos seus Traços ou Laços a ele, permitindo rolar de novo ou melhorar o resultado. Se tiver Laço com esse personagem, ele recupera (NP x 10) PM."
+        },
+        {
+          "name": "Encorajar",
+          "maxLevel": 6,
+          "description": "Cura um aliado e melhora um Atributo dele.",
+          "mechanics": "Gaste uma ação e 5 PM para escolher um aliado que o ouça: ele recupera (NP x 5) PV e escolhe um Atributo, cujo dado atual sobe um passo (máximo d12) até o início do seu próximo turno."
+        },
+        {
+          "name": "Persuasivo",
+          "maxLevel": 2,
+          "description": "Acelera o preenchimento de relógios sociais.",
+          "mechanics": "Ao passar em um teste de charme, diplomacia, engano ou intimidação para preencher/apagar seções de um relógio, gaste até (NP x 20) PM para preencher/apagar uma seção adicional a cada 20 PM gastos."
+        }
+      ]
+    },
+    {
+      "name": "Quimerista",
+      "description": "Mago selvagem que copia poderes e magias de monstros.",
+      "startingBenefits": [
+        "Aumente permanentemente seus PM máximos em 5.",
+        "Pode fazer rituais de Ritualismo."
+      ],
+      "powers": [
+        {
+          "name": "Consumir",
+          "maxLevel": 5,
+          "description": "Recupera PM ao ferir com feitiços usando certas armas.",
+          "mechanics": "Ao causar dano com um feitiço enquanto tiver adaga, arma arcana ou malho equipado, recupere (NP x 2) PM."
+        },
+        {
+          "name": "Imitação Mágica",
+          "maxLevel": 10,
+          "description": "Aprende feitiços vendo monstros conjurá-los.",
+          "mechanics": "Ao ver um feitiço lançado por uma fera, monstro ou planta, você pode aprendê-lo como feitiço de Quimerista (anotando a espécie). Na primeira aquisição, escolha (AST+VON) ou (VIG+VON) para seus feitiços ofensivos. Você memoriza até (NP + 2) feitiços; passando do limite, precisa substituir um antigo."
+        },
+        {
+          "name": "Língua das Feras",
+          "maxLevel": 1,
+          "description": "Comunica-se com feras, monstros e plantas.",
+          "mechanics": "Você pode se comunicar com criaturas das espécies fera, monstro e planta."
+        },
+        {
+          "name": "Patogênese",
+          "maxLevel": 1,
+          "description": "Envenena inimigos da mesma espécie da magia aprendida.",
+          "mechanics": "Ao causar dano com um feitiço de Quimerista, alvos da mesma espécie de onde você aprendeu aquele feitiço ficam envenenados."
+        },
+        {
+          "name": "Quimerismo Ritualista",
+          "maxLevel": 1,
+          "description": "Permite rituais da disciplina quimerismo.",
+          "mechanics": "Você pode fazer rituais de quimerismo. Ao obter este poder, escolha (AST+VON) ou (VIG+VON) para o teste de Magia desses rituais."
+        }
+      ]
+    },
+    {
+      "name": "Erudito",
+      "description": "Buscador implacável de conhecimento, lê as fraquezas inimigas.",
+      "startingBenefits": [
+        "Aumente permanentemente seus PM máximos em 5."
+      ],
+      "powers": [
+        {
+          "name": "Análise Rápida",
+          "maxLevel": 6,
+          "description": "Revela Traços ou Afinidades no início do conflito.",
+          "mechanics": "No início de um conflito, gaste até (NP x 5) PM. Para cada 5 PM: revele um Traço de uma criatura visível; ou revele a Afinidade dela a um tipo de dano escolhido."
+        },
+        {
+          "name": "Concentrado",
+          "maxLevel": 5,
+          "description": "Aumenta PM e melhora testes abertos de Astúcia.",
+          "mechanics": "Aumente permanentemente seus PM máximos em (NP x 3). Em testes abertos usando (AST + AST), recebe bônus igual a (NP)."
+        },
+        {
+          "name": "Conhecimento é Poder",
+          "maxLevel": 1,
+          "description": "Substitui um atributo de precisão por Astúcia.",
+          "mechanics": "Em testes de Precisão, você pode substituir um dos dados de Atributo da arma por Astúcia (ex.: (AST+AST) numa pistola ou (AST+VIG) num machado de guerra)."
+        },
+        {
+          "name": "Lampejo de Saber",
+          "maxLevel": 3,
+          "description": "Faz perguntas ao mestre após uma boa investigação.",
+          "mechanics": "Ao tirar 13+ num teste de investigação (inclusive na ação Estudo), pode fazer até (NP) perguntas ao mestre sobre o alvo investigado, que responde com a verdade. Só pode ser usado uma vez por alvo."
+        },
+        {
+          "name": "Memória Treinada",
+          "maxLevel": 1,
+          "description": "Lembra com perfeição de cenas recentes.",
+          "mechanics": "Você lembra com perfeição de qualquer cena vivida na última semana, podendo revisitá-la mentalmente e usar Lampejo de Saber sobre ela."
+        }
+      ]
+    }
+  ]
+}
