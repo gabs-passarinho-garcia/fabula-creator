@@ -133,17 +133,18 @@ export default function App() {
         console.error("Failed to save to SQLite:", err);
       }
     } else {
-      // Fallback LocalStorage
-      const current = [...savedCharacters];
-      const newRecord: SavedCharRecord = {
-        id: Date.now(),
-        name: sheet.name,
-        created_at: new Date().toISOString(),
-        sheet_json: sheetJson,
-      };
-      const updated = [newRecord, ...current];
-      localStorage.setItem("fabula_characters", JSON.stringify(updated));
-      setSavedCharacters(updated);
+      // Fallback LocalStorage with functional state update to prevent race conditions or stale state issues
+      setSavedCharacters((prev) => {
+        const newRecord: SavedCharRecord = {
+          id: Date.now(),
+          name: sheet.name,
+          created_at: new Date().toISOString(),
+          sheet_json: sheetJson,
+        };
+        const updated = [newRecord, ...prev];
+        localStorage.setItem("fabula_characters", JSON.stringify(updated));
+        return updated;
+      });
     }
   };
 
@@ -156,9 +157,12 @@ export default function App() {
         console.error("Failed to delete from SQLite:", err);
       }
     } else {
-      const updated = savedCharacters.filter((c) => c.id !== id);
-      localStorage.setItem("fabula_characters", JSON.stringify(updated));
-      setSavedCharacters(updated);
+      // Fallback LocalStorage with functional state update to prevent race conditions or stale state issues
+      setSavedCharacters((prev) => {
+        const updated = prev.filter((c) => c.id !== id);
+        localStorage.setItem("fabula_characters", JSON.stringify(updated));
+        return updated;
+      });
     }
   };
 
@@ -182,11 +186,13 @@ export default function App() {
     const diceArray = diceProfileStr.split(", ").map((d) => parseInt(d.replace("d", ""), 10));
     // Shuffle dice
     const shuffledDice = [...diceArray].sort(() => Math.random() - 0.5);
+
+    // Dynamic, language-agnostic attribute stats keys
     const randAttributes: AttributeStats = {
-      DES: shuffledDice[0] || 8,
-      VIG: shuffledDice[1] || 8,
-      AST: shuffledDice[2] || 8,
-      VON: shuffledDice[3] || 8,
+      [strings.attributeOrder[0]]: shuffledDice[0] || 8,
+      [strings.attributeOrder[1]]: shuffledDice[1] || 8,
+      [strings.attributeOrder[2]]: shuffledDice[2] || 8,
+      [strings.attributeOrder[3]]: shuffledDice[3] || 8,
     };
 
     // Class selection (1 to 3 classes)
@@ -323,7 +329,13 @@ export default function App() {
     setStatDistribution(poolStr);
     setStatDicePool(parseDiceStr(poolStr));
     setStatAssignments({});
-    setAssignedStats({ DES: 8, VIG: 8, AST: 8, VON: 8 });
+
+    // Dynamic, language-agnostic attribute stats keys
+    const initialStats = strings.attributeOrder.reduce((acc, key) => {
+      acc[key] = 8;
+      return acc;
+    }, {} as AttributeStats);
+    setAssignedStats(initialStats);
 
     setClassCount(1);
     setSelectedClasses([]);
@@ -343,7 +355,13 @@ export default function App() {
     setStatDistribution(poolStr);
     setStatDicePool(parseDiceStr(poolStr));
     setStatAssignments({});
-    setAssignedStats({ DES: 8, VIG: 8, AST: 8, VON: 8 });
+
+    // Dynamic, language-agnostic attribute stats keys
+    const initialStats = strings.attributeOrder.reduce((acc, key) => {
+      acc[key] = 8;
+      return acc;
+    }, {} as AttributeStats);
+    setAssignedStats(initialStats);
   };
 
   const handleAssignDie = (statName: string, dieValue: number, poolIndex: number) => {
@@ -362,7 +380,13 @@ export default function App() {
     playCancel();
     setStatDicePool(parseDiceStr(statDistribution));
     setStatAssignments({});
-    setAssignedStats({ DES: 8, VIG: 8, AST: 8, VON: 8 });
+
+    // Dynamic, language-agnostic attribute stats keys
+    const initialStats = strings.attributeOrder.reduce((acc, key) => {
+      acc[key] = 8;
+      return acc;
+    }, {} as AttributeStats);
+    setAssignedStats(initialStats);
   };
 
   const handleToggleClass = (rpgClass: RpgClass) => {

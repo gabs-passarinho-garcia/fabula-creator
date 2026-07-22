@@ -491,7 +491,8 @@
           "name": "Elemental Magic",
           "maxLevel": 10,
           "description": "Learns Elementalist spells.",
-          "mechanics": "Each level, learn one Elementalist spell. Offensive Elementalist spells use (INS + WIL) for the Magic check."
+          "mechanics": "Each level, learn one Elementalist spell. Offensive Elementalist spells use (INS + WIL) for the Magic check.",
+          "grantsSpell": true
         }
       ]
     },
@@ -519,7 +520,8 @@
           "name": "Entropic Magic",
           "maxLevel": 10,
           "description": "Learns Entropist spells.",
-          "mechanics": "Each level, learn one Entropist spell. Offensive Entropist spells use (INS + WIL) for the Magic check."
+          "mechanics": "Each level, learn one Entropist spell. Offensive Entropist spells use (INS + WIL) for the Magic check.",
+          "grantsSpell": true
         },
         {
           "name": "Lucky Seven",
@@ -559,7 +561,8 @@
           "name": "Spirit Magic",
           "maxLevel": 10,
           "description": "Learns Spiritist spells.",
-          "mechanics": "Each level, learn one Spiritist spell. Offensive Spiritist spells use (INS + WIL) for the Magic check."
+          "mechanics": "Each level, learn one Spiritist spell. Offensive Spiritist spells use (INS + WIL) for the Magic check.",
+          "grantsSpell": true
         },
         {
           "name": "Healing Power",

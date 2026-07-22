@@ -1,13 +1,13 @@
 {
-  "dependencies": {},
+  "name": "fabula-creator-root",
+  "private": true,
   "scripts": {
-    "build": "bun tauri:windows && bun tauri:build",
     "tauri": "tauri",
-    "tauri:dev": "tauri dev",
-    "tauri:build": "APPIMAGE_EXTRACT_AND_RUN=1 bun tauri build",
-    "tauri:windows": "bash build-windows.sh"
+    "dev": "bun tauri dev",
+    "build": "bun tauri build",
+    "build:windows": "./build-windows.sh"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^2.11.4"
+    "@tauri-apps/cli": "^2.1.0"
   }
 }
