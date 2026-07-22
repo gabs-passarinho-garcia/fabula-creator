@@ -70,6 +70,19 @@
   cursor: not-allowed;
 }
 
+/* Native select controls need an explicit foreground color because the app
+   inherits the white text color from the dark JRPG shell. */
+.jrpg-select {
+  color: #030412;
+  background-color: #f4f4f5;
+  color-scheme: light;
+}
+
+.jrpg-select option {
+  color: #030412;
+  background-color: #f4f4f5;
+}
+
 .pixel-font {
   font-family: 'Press Start 2P', monospace;
 }

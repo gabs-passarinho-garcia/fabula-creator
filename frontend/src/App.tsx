@@ -554,7 +554,7 @@ export default function App() {
                     <select
                       value={concept}
                       onChange={(e) => setConcept(e.target.value)}
-                      className="w-full bg-[#07071f] border-2 border-white p-3 text-xs outline-none"
+                      className="jrpg-select w-full border-2 border-white p-3 text-xs outline-none"
                     >
                       {gameData.identityTables.concepts.map((c, i) => (
                         <option key={i} value={c}>{c}</option>
@@ -569,7 +569,7 @@ export default function App() {
                     <select
                       value={adjective}
                       onChange={(e) => setAdjective(e.target.value)}
-                      className="w-full bg-[#07071f] border-2 border-white p-3 text-xs outline-none"
+                      className="jrpg-select w-full border-2 border-white p-3 text-xs outline-none"
                     >
                       {gameData.identityTables.adjectives.map((a, i) => (
                         <option key={i} value={a}>{a}</option>
@@ -584,7 +584,7 @@ export default function App() {
                     <select
                       value={detail}
                       onChange={(e) => setDetail(e.target.value)}
-                      className="w-full bg-[#07071f] border-2 border-white p-3 text-xs outline-none"
+                      className="jrpg-select w-full border-2 border-white p-3 text-xs outline-none"
                     >
                       {gameData.identityTables.details.map((d, i) => (
                         <option key={i} value={d}>{d}</option>
@@ -611,7 +611,7 @@ export default function App() {
                   <select
                     value={theme}
                     onChange={(e) => setTheme(e.target.value)}
-                    className="w-full bg-[#07071f] border-2 border-white p-3 text-xs outline-none"
+                    className="jrpg-select w-full border-2 border-white p-3 text-xs outline-none"
                   >
                     {gameData.themes.map((t, i) => (
                       <option key={i} value={t.name}>
