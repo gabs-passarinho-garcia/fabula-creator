@@ -34,6 +34,8 @@ import {
   Save,
   ChevronRight,
   Sparkle,
+  CheckCircle2,
+  X,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 
@@ -43,6 +45,30 @@ interface SavedCharRecord {
   created_at: string;
   sheet_json: string;
 }
+
+interface SaveFilePickerOptions {
+  suggestedName?: string;
+  types?: Array<{
+    description: string;
+    accept: Record<string, string[]>;
+  }>;
+}
+
+interface SaveFileHandle {
+  createWritable: () => Promise<{
+    write: (data: string) => Promise<void>;
+    close: () => Promise<void>;
+  }>;
+}
+
+interface FilePickerWindow extends Window {
+  showSaveFilePicker?: (options?: SaveFilePickerOptions) => Promise<SaveFileHandle>;
+}
+
+type SuccessModal = {
+  title: string;
+  message: string;
+} | null;
 
 export default function App() {
   const [locale, setLocale] = useState<Locale>("pt");
@@ -54,6 +80,7 @@ export default function App() {
 
   // Active character sheet being viewed
   const [activeSheet, setActiveSheet] = useState<CharacterSheet | null>(null);
+  const [successModal, setSuccessModal] = useState<SuccessModal>(null);
 
   // --- Manual Creation States ---
   const [manualStep, setManualStep] = useState<number>(1);
@@ -393,10 +420,13 @@ export default function App() {
     const isSelected = selectedClasses.some((c) => c.name === rpgClass.name);
     if (isSelected) {
       playCancel();
-      setSelectedClasses(selectedClasses.filter((c) => c.name !== rpgClass.name));
+      const nextClasses = selectedClasses.filter((c) => c.name !== rpgClass.name);
+      setSelectedClasses(nextClasses);
       const updatedLevels = { ...classLevels };
       delete updatedLevels[rpgClass.name];
       setClassLevels(updatedLevels);
+      setSelectedPowers([]);
+      setSelectedSpells([]);
     } else {
       if (selectedClasses.length >= classCount) {
         playCancel();
@@ -405,12 +435,18 @@ export default function App() {
       playConfirm();
       setSelectedClasses([...selectedClasses, rpgClass]);
       setClassLevels({ ...classLevels, [rpgClass.name]: 1 });
+      setSelectedPowers([]);
+      setSelectedSpells([]);
     }
   };
 
   const updateClassLevel = (className: string, level: number) => {
     playClick();
     setClassLevels({ ...classLevels, [className]: level });
+    // Powers and spells are tied to class levels. A level change invalidates the
+    // previous choices and makes the user review the available slots again.
+    setSelectedPowers([]);
+    setSelectedSpells([]);
   };
 
   // Check if manually assigned levels sum up to 5
@@ -519,6 +555,12 @@ export default function App() {
           setActiveSheet(sheet);
           setCurrentScreen("sheet");
           confetti({ particleCount: 50, spread: 40 });
+          setSuccessModal({
+            title: locale === "pt" ? "Importação concluída" : "Import completed",
+            message: locale === "pt"
+              ? `A ficha de ${sheet.name} foi importada com sucesso.`
+              : `${sheet.name}'s character sheet was imported successfully.`,
+          });
         } else {
           alert("Ficha inválida! Formato incorreto.");
           playCancel();
@@ -529,18 +571,48 @@ export default function App() {
       }
     };
     reader.readAsText(file);
+    e.target.value = "";
   };
 
   // Export JSON Character Sheet
-  const handleExportJson = (sheet: CharacterSheet) => {
+  const handleExportJson = async (sheet: CharacterSheet) => {
     playConfirm();
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(sheet, null, 2));
-    const downloadAnchor = document.createElement("a");
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `${sheet.name.toLowerCase().replace(/\s+/g, "_")}_ficha.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
+    const fileName = `${sheet.name.toLowerCase().replace(/\s+/g, "_")}_ficha.json`;
+    const json = JSON.stringify(sheet, null, 2);
+
+    try {
+      const pickerWindow = window as FilePickerWindow;
+      if (pickerWindow.showSaveFilePicker) {
+        const fileHandle = await pickerWindow.showSaveFilePicker({
+          suggestedName: fileName,
+          types: [{ description: "JSON character sheet", accept: { "application/json": [".json"] } }],
+        });
+        const writable = await fileHandle.createWritable();
+        await writable.write(json);
+        await writable.close();
+      } else {
+        // Fallback for browsers/WebViews without the File System Access API.
+        const dataStr = "data:application/json;charset=utf-8," + encodeURIComponent(json);
+        const downloadAnchor = document.createElement("a");
+        downloadAnchor.href = dataStr;
+        downloadAnchor.download = fileName;
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+      }
+
+      setSuccessModal({
+        title: locale === "pt" ? "Exportação concluída" : "Export completed",
+        message: locale === "pt"
+          ? `A ficha foi salva como ${fileName}.`
+          : `The character sheet was saved as ${fileName}.`,
+      });
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
+      console.error("Failed to export character sheet:", err);
+      alert(locale === "pt" ? "Não foi possível exportar a ficha." : "The character sheet could not be exported.");
+      playCancel();
+    }
   };
 
   // Formatted identity permissions
@@ -591,7 +663,7 @@ export default function App() {
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border-2 border-white/20 text-xs pixel-font hover:bg-white/10"
           >
             <Languages className="w-4 h-4 text-cyan-400" />
-            {locale === "pt" ? "EN" : "PT"}
+            {locale === "pt" ? "PT" : "EN"}
           </button>
         </div>
       </header>
@@ -1040,6 +1112,8 @@ export default function App() {
                           setClassCount(num);
                           setSelectedClasses([]);
                           setClassLevels({});
+                          setSelectedPowers([]);
+                          setSelectedSpells([]);
                         }}
                         className={`w-8 h-8 flex items-center justify-center border-2 text-xs font-mono ${
                           classCount === num
@@ -1671,6 +1745,26 @@ export default function App() {
           </div>
         )}
       </main>
+
+      {successModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" role="dialog" aria-modal="true">
+          <div className="jrpg-container w-full max-w-md p-6 text-center space-y-4">
+            <CheckCircle2 className="mx-auto h-12 w-12 text-green-400" />
+            <h2 className="pixel-font text-sm text-yellow-300">{successModal.title}</h2>
+            <p className="font-mono text-xs text-white/80">{successModal.message}</p>
+            <button
+              onClick={() => {
+                playClick();
+                setSuccessModal(null);
+              }}
+              className="jrpg-button mx-auto flex items-center gap-2 px-4 py-2 text-xs"
+            >
+              <X className="h-3.5 w-3.5" />
+              {locale === "pt" ? "Fechar" : "Close"}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
