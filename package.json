@@ -4,7 +4,8 @@
   "scripts": {
     "tauri": "tauri",
     "dev": "bun tauri dev",
-    "build": "bun tauri build",
+    "build": "bun build:windows && bun build:linux",
+    "build:linux": "bun tauri build",
     "build:windows": "./build-windows.sh",
     "test": "bun test && cd cargo && cargo test"
   },
