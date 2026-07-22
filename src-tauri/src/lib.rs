@@ -1,23 +1,12 @@
-use rusqlite::{params, Connection};
-use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
 use tauri::Manager;
 
+mod database;
+use database::{CharacterDatabase, SavedCharacter};
+
 struct DbState {
   db_path: PathBuf,
-}
-
-#[derive(Serialize, Deserialize, Clone)]
-pub struct SavedCharacter {
-  id: i64,
-  name: String,
-  created_at: String,
-  sheet_json: String,
-}
-
-fn get_connection(db_path: &PathBuf) -> Result<Connection, String> {
-  Connection::open(db_path).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -26,50 +15,17 @@ fn save_character(
   name: String,
   sheet_json: String,
 ) -> Result<i64, String> {
-  let conn = get_connection(&state.db_path)?;
-  conn.execute(
-    "INSERT INTO characters (name, sheet_json) VALUES (?1, ?2)",
-    params![name, sheet_json],
-  )
-  .map_err(|e| e.to_string())?;
-
-  let last_id = conn.last_insert_rowid();
-  Ok(last_id)
+  CharacterDatabase::open(&state.db_path)?.save(&name, &sheet_json)
 }
 
 #[tauri::command]
 fn load_characters(state: tauri::State<'_, DbState>) -> Result<Vec<SavedCharacter>, String> {
-  let conn = get_connection(&state.db_path)?;
-  let mut stmt = conn
-    .prepare("SELECT id, name, created_at, sheet_json FROM characters ORDER BY id DESC")
-    .map_err(|e| e.to_string())?;
-
-  let rows = stmt
-    .query_map([], |row| {
-      Ok(SavedCharacter {
-        id: row.get(0)?,
-        name: row.get(1)?,
-        created_at: row.get(2)?,
-        sheet_json: row.get(3)?,
-      })
-    })
-    .map_err(|e| e.to_string())?;
-
-  let mut chars = Vec::new();
-  for char_res in rows {
-    if let Ok(c) = char_res {
-      chars.push(c);
-    }
-  }
-  Ok(chars)
+  CharacterDatabase::open(&state.db_path)?.load()
 }
 
 #[tauri::command]
 fn delete_character(state: tauri::State<'_, DbState>, id: i64) -> Result<(), String> {
-  let conn = get_connection(&state.db_path)?;
-  conn.execute("DELETE FROM characters WHERE id = ?1", params![id])
-    .map_err(|e| e.to_string())?;
-  Ok(())
+  CharacterDatabase::open(&state.db_path)?.delete(id)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -85,18 +41,7 @@ pub fn run() {
       fs::create_dir_all(&app_dir).map_err(|e| e.to_string())?;
       let db_path = app_dir.join("fabula_characters.db");
 
-      // Initialize database schema
-      let conn = Connection::open(&db_path).map_err(|e| e.to_string())?;
-      conn.execute(
-        "CREATE TABLE IF NOT EXISTS characters (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT NOT NULL,
-          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          sheet_json TEXT NOT NULL
-        )",
-        [],
-      )
-      .map_err(|e| e.to_string())?;
+      CharacterDatabase::open(&db_path)?;
 
       app.manage(DbState { db_path });
 

@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { invoke } from "@tauri-apps/api/core";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { sounds } from "./sound";
 import { getLocaleStrings, getGameData } from "./i18n";
 import {
   deriveEquipmentPermissions,
   filterCatalogByPermissions,
   buildEquipmentPurchaseResult,
-  selectRandomEquipment,
 } from "./equipment";
 import type { Locale, LocaleStrings } from "./i18n/types";
 import type {
@@ -21,49 +19,25 @@ import type {
   SelectedPower,
   SelectedSpell,
   AttributeStats,
-  DerivedStats,
+  Weapon,
 } from "./types";
 import {
-  Volume2,
-  VolumeX,
-  Languages,
   RotateCcw,
-  Trash2,
-  Download,
-  Upload,
-  Save,
-  ChevronRight,
-  Sparkle,
   CheckCircle2,
   X,
 } from "lucide-react";
 import confetti from "canvas-confetti";
-
-interface SavedCharRecord {
-  id: number;
-  name: string;
-  created_at: string;
-  sheet_json: string;
-}
-
-interface SaveFilePickerOptions {
-  suggestedName?: string;
-  types?: Array<{
-    description: string;
-    accept: Record<string, string[]>;
-  }>;
-}
-
-interface SaveFileHandle {
-  createWritable: () => Promise<{
-    write: (data: string) => Promise<void>;
-    close: () => Promise<void>;
-  }>;
-}
-
-interface FilePickerWindow extends Window {
-  showSaveFilePicker?: (options?: SaveFilePickerOptions) => Promise<SaveFileHandle>;
-}
+import { calculateDerivedStats } from "./domain/characterStats";
+import { generateRandomCharacter } from "./domain/characterCreation";
+import { isTauriRuntime } from "./shared/tauri";
+import { exportCharacterSheet, parseCharacterSheet } from "./services/characterFileService";
+import type { CharacterRepository, SavedCharacterRecord } from "./services/characterRepository";
+import { createLocalStorageCharacterRepository } from "./services/localStorageCharacterRepository";
+import { createTauriCharacterRepository } from "./services/tauriCharacterRepository";
+import { AppHeader } from "./components/AppHeader";
+import { TitleScreen } from "./components/TitleScreen";
+import { HeroGallery } from "./components/HeroGallery";
+import { CharacterSheetView } from "./components/CharacterSheetView";
 
 type SuccessModal = {
   title: string;
@@ -76,7 +50,7 @@ export default function App() {
   const [currentScreen, setCurrentScreen] = useState<"title" | "random" | "manual" | "gallery" | "sheet">("title");
 
   // Gallery states
-  const [savedCharacters, setSavedCharacters] = useState<SavedCharRecord[]>([]);
+  const [savedCharacters, setSavedCharacters] = useState<SavedCharacterRecord[]>([]);
 
   // Active character sheet being viewed
   const [activeSheet, setActiveSheet] = useState<CharacterSheet | null>(null);
@@ -121,76 +95,33 @@ export default function App() {
     sounds.setSoundEnabled(soundOn);
   }, [soundOn]);
 
-  useEffect(() => {
-    loadSavedCharacters();
-  }, []);
+  const repository = useMemo<CharacterRepository>(
+    () => isTauriRuntime()
+      ? createTauriCharacterRepository()
+      : createLocalStorageCharacterRepository(),
+    [],
+  );
 
-  const isTauri = () => {
-    return typeof (window as any).__TAURI_INTERNALS__ !== "undefined";
-  };
-
-  const loadSavedCharacters = async () => {
-    if (isTauri()) {
-      try {
-        const chars = await invoke<SavedCharRecord[]>("load_characters");
-        setSavedCharacters(chars);
-      } catch (err) {
-        console.error("Failed to load from SQLite:", err);
-      }
-    } else {
-      // Fallback: LocalStorage
-      const stored = localStorage.getItem("fabula_characters");
-      if (stored) {
-        try {
-          setSavedCharacters(JSON.parse(stored));
-        } catch (e) {
-          console.error("Failed to parse characters from LocalStorage");
-        }
-      }
+  const loadSavedCharacters = useCallback(async () => {
+    try {
+      setSavedCharacters(await repository.load());
+    } catch (error) {
+      console.error("Failed to load saved characters:", error);
     }
-  };
+  }, [repository]);
+
+  useEffect(() => {
+    void loadSavedCharacters();
+  }, [loadSavedCharacters]);
 
   const saveCharacterToDb = async (sheet: CharacterSheet) => {
-    const sheetJson = JSON.stringify(sheet);
-    if (isTauri()) {
-      try {
-        await invoke("save_character", { name: sheet.name, sheetJson });
-        await loadSavedCharacters();
-      } catch (err) {
-        console.error("Failed to save to SQLite:", err);
-      }
-    } else {
-      // Fallback LocalStorage with functional state update to prevent race conditions or stale state issues
-      setSavedCharacters((prev) => {
-        const newRecord: SavedCharRecord = {
-          id: Date.now(),
-          name: sheet.name,
-          created_at: new Date().toISOString(),
-          sheet_json: sheetJson,
-        };
-        const updated = [newRecord, ...prev];
-        localStorage.setItem("fabula_characters", JSON.stringify(updated));
-        return updated;
-      });
-    }
+    await repository.save(sheet);
+    await loadSavedCharacters();
   };
 
   const deleteCharacterFromDb = async (id: number) => {
-    if (isTauri()) {
-      try {
-        await invoke("delete_character", { id });
-        await loadSavedCharacters();
-      } catch (err) {
-        console.error("Failed to delete from SQLite:", err);
-      }
-    } else {
-      // Fallback LocalStorage with functional state update to prevent race conditions or stale state issues
-      setSavedCharacters((prev) => {
-        const updated = prev.filter((c) => c.id !== id);
-        localStorage.setItem("fabula_characters", JSON.stringify(updated));
-        return updated;
-      });
-    }
+    await repository.delete(id);
+    await loadSavedCharacters();
   };
 
   // Sound triggers wrapping manager
@@ -202,96 +133,7 @@ export default function App() {
   // Mode selections
   const handleRandomCreation = () => {
     playConfirm();
-    // Identity randoms
-    const randomConcept = gameData.identityTables.concepts[Math.floor(Math.random() * gameData.identityTables.concepts.length)];
-    const randomAdjective = gameData.identityTables.adjectives[Math.floor(Math.random() * gameData.identityTables.adjectives.length)];
-    const randomDetail = gameData.identityTables.details[Math.floor(Math.random() * gameData.identityTables.details.length)];
-    const randomTheme = gameData.themes[Math.floor(Math.random() * gameData.themes.length)].name;
-
-    // Attribute dice random allocation
-    const diceProfileStr = gameData.attributes.arrays[Math.floor(Math.random() * gameData.attributes.arrays.length)].values;
-    const diceArray = diceProfileStr.split(", ").map((d) => parseInt(d.replace("d", ""), 10));
-    // Shuffle dice
-    const shuffledDice = [...diceArray].sort(() => Math.random() - 0.5);
-
-    // Dynamic, language-agnostic attribute stats keys
-    const randAttributes: AttributeStats = {
-      [strings.attributeOrder[0]]: shuffledDice[0] || 8,
-      [strings.attributeOrder[1]]: shuffledDice[1] || 8,
-      [strings.attributeOrder[2]]: shuffledDice[2] || 8,
-      [strings.attributeOrder[3]]: shuffledDice[3] || 8,
-    };
-
-    // Class selection (1 to 3 classes)
-    const randomClassCount = Math.floor(Math.random() * 3) + 1;
-    // Shuffle classes
-    const shuffledClasses = [...gameData.classes].sort(() => Math.random() - 0.5);
-    const pickedClasses = shuffledClasses.slice(0, randomClassCount);
-
-    // Distribute 5 levels
-    const levels = Array.from({ length: randomClassCount }, () => 1);
-    let remainingLevels = 5 - randomClassCount;
-    while (remainingLevels > 0) {
-      const idx = Math.floor(Math.random() * randomClassCount);
-      levels[idx]++;
-      remainingLevels--;
-    }
-
-    const selClasses: SelectedClass[] = pickedClasses.map((rc, index) => ({
-      rpgClass: rc,
-      level: levels[index],
-    }));
-
-    // Pick Powers (1 power per level)
-    const randPowers: SelectedPower[] = [];
-    selClasses.forEach(({ rpgClass, level }) => {
-      const shuffledPowers = [...rpgClass.powers].sort(() => Math.random() - 0.5);
-      const picked = shuffledPowers.slice(0, level);
-      picked.forEach((power) => {
-        randPowers.push({ power, className: rpgClass.name });
-      });
-    });
-
-    // Pick Spells if any powers grant them
-    const randSpells: SelectedSpell[] = [];
-    const spellPowers = randPowers.filter((p) => p.power.grantsSpell);
-    spellPowers.forEach(({ power, className }) => {
-      const rc = pickedClasses.find((c) => c.name === className);
-      if (rc && rc.spells && rc.spells.length > 0) {
-        // Find unlearned
-        const alreadyLearned = new Set(randSpells.map((s) => s.spell.name));
-        const learnable = rc.spells.filter((s) => !alreadyLearned.has(s.name));
-        const finalPool = learnable.length > 0 ? learnable : rc.spells;
-        const randomSpell = finalPool[Math.floor(Math.random() * finalPool.length)];
-        randSpells.push({ spell: randomSpell, className, grantedByPower: power.name });
-      }
-    });
-
-    // Equipment shop calculations
-    const purchase = selectRandomEquipment(
-      gameData.equipmentCatalog,
-      pickedClasses,
-      gameData.startingBudget,
-      strings.equipmentBenefitPatterns
-    );
-
-    // Calc stats
-    const derivedStats = calculateStats(randAttributes, pickedClasses, purchase.equipment, 5);
-
-    const sheet: CharacterSheet = {
-      name: strings.defaults.randomHeroName,
-      identity: `${randomAdjective} ${randomConcept} ${randomDetail}`,
-      theme: randomTheme,
-      classes: selClasses,
-      powers: randPowers,
-      spells: randSpells,
-      attributes: randAttributes,
-      equipment: purchase.equipment,
-      derivedStats,
-      equipmentSpent: purchase.equipmentSpent,
-      money: purchase.money,
-      moneyRoll: purchase.moneyRoll,
-    };
+    const sheet = generateRandomCharacter(gameData, strings);
 
     setActiveSheet(sheet);
     setCurrentScreen("sheet");
@@ -299,42 +141,6 @@ export default function App() {
       playLevelUp();
       confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
     }, 150);
-  };
-
-  const calculateStats = (
-    attrs: AttributeStats,
-    classes: RpgClass[],
-    equip: any,
-    level: number
-  ): DerivedStats => {
-    const hpBonus = classes.reduce(
-      (acc, c) => acc + (c.startingBenefits.some((b) => strings.benefitPatterns.hp.test(b)) ? 5 : 0),
-      0
-    );
-    const mpBonus = classes.reduce(
-      (acc, c) => acc + (c.startingBenefits.some((b) => strings.benefitPatterns.mp.test(b)) ? 5 : 0),
-      0
-    );
-    const ipBonus = classes.reduce(
-      (acc, c) => acc + (c.startingBenefits.some((b) => strings.benefitPatterns.ip.test(b)) ? 2 : 0),
-      0
-    );
-
-    const statMapping = strings.statMapping;
-    const baseDef = (equip.armor?.baseDefense ?? 0) + (attrs[statMapping.defense] || 8);
-    const baseMDef = (equip.armor?.baseMagicDefense ?? 0) + (attrs[statMapping.magicDefense] || 8);
-    const shieldDef = equip.shield?.isEquipped ? equip.shield.defenseBonus : 0;
-    const shieldMDef = equip.shield?.isEquipped ? equip.shield.magicDefenseBonus : 0;
-    const armorInitiativePenalty = equip.armor?.initiativePenalty ?? 0;
-
-    return {
-      hp: level + (attrs[statMapping.hp] || 8) * 5 + hpBonus,
-      mp: level + (attrs[statMapping.mp] || 8) * 5 + mpBonus,
-      ip: 6 + ipBonus,
-      defense: baseDef + shieldDef,
-      magicDefense: baseMDef + shieldMDef,
-      initiative: 0 - armorInitiativePenalty,
-    };
   };
 
   // Helper to parse dice pools
@@ -500,7 +306,13 @@ export default function App() {
     };
 
     const purchaseResult = buildEquipmentPurchaseResult(equipSelection, gameData.startingBudget);
-    const derivedStats = calculateStats(assignedStats, selectedClasses, purchaseResult.equipment, 5);
+    const derivedStats = calculateDerivedStats(
+      assignedStats,
+      selectedClasses,
+      purchaseResult.equipment,
+      5,
+      strings,
+    );
 
     const sheet: CharacterSheet = {
       name: name || strings.defaults.randomHeroName,
@@ -526,7 +338,7 @@ export default function App() {
   };
 
   // Format Helper for attacks
-  const formatWeaponAttackString = (weapon: any, attrs: AttributeStats) => {
+  const formatWeaponAttackString = (weapon: Weapon, attrs: AttributeStats) => {
     const [attr1, attr2] = weapon.accuracyAttributes;
     const roll1 = attrs[attr1] || 8;
     const roll2 = attrs[attr2] || 8;
@@ -549,8 +361,10 @@ export default function App() {
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
-        const sheet = JSON.parse(event.target?.result as string) as CharacterSheet;
-        if (sheet && sheet.name && sheet.identity) {
+        const result = event.target?.result;
+        if (typeof result !== "string") throw new Error("Invalid file contents");
+        const sheet = parseCharacterSheet(result);
+        if (sheet.name && sheet.identity) {
           playLevelUp();
           setActiveSheet(sheet);
           setCurrentScreen("sheet");
@@ -565,7 +379,7 @@ export default function App() {
           alert("Ficha inválida! Formato incorreto.");
           playCancel();
         }
-      } catch (err) {
+      } catch {
         alert("Erro ao decodificar JSON.");
         playCancel();
       }
@@ -577,29 +391,9 @@ export default function App() {
   // Export JSON Character Sheet
   const handleExportJson = async (sheet: CharacterSheet) => {
     playConfirm();
-    const fileName = `${sheet.name.toLowerCase().replace(/\s+/g, "_")}_ficha.json`;
-    const json = JSON.stringify(sheet, null, 2);
 
     try {
-      const pickerWindow = window as FilePickerWindow;
-      if (pickerWindow.showSaveFilePicker) {
-        const fileHandle = await pickerWindow.showSaveFilePicker({
-          suggestedName: fileName,
-          types: [{ description: "JSON character sheet", accept: { "application/json": [".json"] } }],
-        });
-        const writable = await fileHandle.createWritable();
-        await writable.write(json);
-        await writable.close();
-      } else {
-        // Fallback for browsers/WebViews without the File System Access API.
-        const dataStr = "data:application/json;charset=utf-8," + encodeURIComponent(json);
-        const downloadAnchor = document.createElement("a");
-        downloadAnchor.href = dataStr;
-        downloadAnchor.download = fileName;
-        document.body.appendChild(downloadAnchor);
-        downloadAnchor.click();
-        downloadAnchor.remove();
-      }
+      const fileName = await exportCharacterSheet(sheet);
 
       setSuccessModal({
         title: locale === "pt" ? "Exportação concluída" : "Export completed",
@@ -629,210 +423,45 @@ export default function App() {
       <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%] pointer-events-none"></div>
 
       {/* Retro HUD Panel - Header */}
-      <header className="relative z-10 p-4 flex justify-between items-center bg-[#07071f]/80 border-b-4 border-double border-white/20">
-        <div className="flex items-center gap-3">
-          <Sparkle className="text-yellow-400 w-6 h-6 animate-pulse" />
-          <h1 className="pixel-font text-xs sm:text-sm tracking-wider text-yellow-300">
-            FABULA ULTIMA
-          </h1>
-        </div>
-
-        <div className="flex items-center gap-4">
-          {/* Sound Toggle Button */}
-          <button
-            onClick={() => {
-              setSoundOn(!soundOn);
-              sounds.playClick();
-            }}
-            className="flex items-center justify-center p-2 rounded-md hover:bg-white/10 active:scale-95 transition"
-            title={soundOn ? "Mute Retro Sounds" : "Unmute Retro Sounds"}
-          >
-            {soundOn ? (
-              <Volume2 className="w-5 h-5 text-yellow-400" />
-            ) : (
-              <VolumeX className="w-5 h-5 text-gray-400" />
-            )}
-          </button>
-
-          {/* Language Toggle Button */}
-          <button
-            onClick={() => {
-              setLocale(locale === "pt" ? "en" : "pt");
-              sounds.playClick();
-            }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md border-2 border-white/20 text-xs pixel-font hover:bg-white/10"
-          >
-            <Languages className="w-4 h-4 text-cyan-400" />
-            {locale === "pt" ? "PT" : "EN"}
-          </button>
-        </div>
-      </header>
+      <AppHeader
+        locale={locale}
+        soundOn={soundOn}
+        onSoundToggle={() => { setSoundOn(!soundOn); sounds.playClick(); }}
+        onLocaleToggle={() => { setLocale(locale === "pt" ? "en" : "pt"); sounds.playClick(); }}
+      />
 
       {/* Main Container */}
       <main className="flex-1 flex flex-col items-center justify-center p-4 relative z-10 max-w-5xl w-full mx-auto my-4">
         {/* ==================== TITLE SCREEN ==================== */}
         {currentScreen === "title" && (
-          <div className="w-full max-w-xl text-center space-y-8 my-8 flex flex-col items-center">
-            {/* Title Pixel Box */}
-            <div className="jrpg-container p-6 sm:p-8 w-full">
-              <h2 className="pixel-text-lg text-yellow-300 leading-normal animate-pulse text-center drop-shadow-md mb-2">
-                {strings.introTitle}
-              </h2>
-              <p className="text-xs text-blue-300 tracking-widest pixel-font mt-4">
-                LEGENDARY CHARACTER CREATOR v2
-              </p>
-            </div>
-
-            {/* Menu Buttons JRPG Style */}
-            <div className="flex flex-col gap-4 w-full max-w-md">
-              <button
-                onClick={startManualCreation}
-                className="jrpg-button text-left p-4 rounded-none text-white hover:text-yellow-200 flex items-center justify-between"
-              >
-                <span>⚔️ {strings.modeManual}</span>
-                <ChevronRight className="w-4 h-4 animate-bounce" />
-              </button>
-
-              <button
-                onClick={handleRandomCreation}
-                className="jrpg-button text-left p-4 rounded-none text-white hover:text-yellow-200 flex items-center justify-between"
-              >
-                <span>🎲 {strings.modeRandom}</span>
-                <ChevronRight className="w-4 h-4" />
-              </button>
-
-              <button
-                onClick={() => {
-                  playConfirm();
-                  setCurrentScreen("gallery");
-                }}
-                className="jrpg-button text-left p-4 rounded-none text-white hover:text-yellow-200 flex items-center justify-between"
-              >
-                <span>🏆 {locale === "pt" ? "Galeria de Heróis" : "Hero Gallery"}</span>
-                <span className="text-xs bg-yellow-500/20 text-yellow-300 px-2 py-0.5 rounded border border-yellow-400/30">
-                  {savedCharacters.length}
-                </span>
-              </button>
-
-              {/* JSON Import Input Hidden */}
-              <label className="jrpg-button text-left p-4 rounded-none text-white hover:text-yellow-200 flex items-center justify-between cursor-pointer">
-                <span>📂 {locale === "pt" ? "Importar Ficha (.json)" : "Import Sheet (.json)"}</span>
-                <Upload className="w-4 h-4" />
-                <input
-                  type="file"
-                  accept=".json"
-                  onChange={handleImportJson}
-                  className="hidden"
-                />
-              </label>
-            </div>
-
-            {/* Retro Footer Credits */}
-            <div className="text-center text-xs text-white/40 font-mono tracking-widest">
-              INSPIRADO EM SEA OF STARS & FFIX • ESTILO PIXEL ART & JRPG
-            </div>
-          </div>
+          <TitleScreen
+            strings={strings}
+            locale={locale}
+            localeLabel={locale === "pt" ? "Galeria de Heróis" : "Hero Gallery"}
+            savedCharacterCount={savedCharacters.length}
+            onManualCreation={startManualCreation}
+            onRandomCreation={handleRandomCreation}
+            onGallery={() => { playConfirm(); setCurrentScreen("gallery"); }}
+            onImport={handleImportJson}
+          />
         )}
 
         {/* ==================== HERO GALLERY ==================== */}
         {currentScreen === "gallery" && (
-          <div className="w-full max-w-3xl jrpg-container p-6 space-y-6">
-            <div className="flex justify-between items-center border-b-2 border-white/20 pb-4">
-              <h2 className="pixel-font text-xs sm:text-sm text-yellow-300">
-                {locale === "pt" ? "🏆 GALERIA DE HERÓIS" : "🏆 HERO GALLERY"}
-              </h2>
-              <button
-                onClick={() => {
-                  playCancel();
-                  setCurrentScreen("title");
-                }}
-                className="jrpg-button px-4 py-2"
-              >
-                {locale === "pt" ? "Voltar" : "Back"}
-              </button>
-            </div>
-
-            {savedCharacters.length === 0 ? (
-              <div className="text-center py-12 text-white/50 space-y-4">
-                <p className="pixel-font text-xs">
-                  {locale === "pt" ? "Nenhum herói forjado ainda..." : "No heroes forged yet..."}
-                </p>
-                <button
-                  onClick={startManualCreation}
-                  className="jrpg-button px-4 py-2 mt-2"
-                >
-                  {locale === "pt" ? "Criar Primeiro Herói" : "Create First Hero"}
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar font-mono">
-                {savedCharacters.map((char) => {
-                  let parsedSheet: CharacterSheet;
-                  try {
-                    parsedSheet = JSON.parse(char.sheet_json);
-                  } catch (e) {
-                    return null;
-                  }
-
-                  const classSummary = parsedSheet.classes
-                    .map((c) => `${c.rpgClass.name} (Lvl ${c.level})`)
-                    .join(", ");
-
-                  return (
-                    <div
-                      key={char.id}
-                      className="jrpg-panel p-4 flex flex-col justify-between hover:border-yellow-400 cursor-pointer transition relative group"
-                    >
-                      <div
-                        onClick={() => {
-                          playConfirm();
-                          setActiveSheet(parsedSheet);
-                          setCurrentScreen("sheet");
-                        }}
-                        className="space-y-2 flex-1"
-                      >
-                        <p className="pixel-font text-xs text-yellow-300 group-hover:text-yellow-200">
-                          {parsedSheet.name}
-                        </p>
-                        <p className="text-xs text-white/70 italic line-clamp-1">
-                          {parsedSheet.identity}
-                        </p>
-                        <p className="text-xs text-blue-300 line-clamp-1">
-                          {classSummary}
-                        </p>
-                      </div>
-
-                      <div className="flex justify-end gap-2 mt-4 border-t border-white/10 pt-2">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleExportJson(parsedSheet);
-                          }}
-                          className="p-1.5 border border-white/20 hover:border-white text-xs hover:bg-white/10"
-                          title="Export JSON"
-                        >
-                          <Download className="w-3.5 h-3.5 text-cyan-400" />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            playCancel();
-                            if (confirm(locale === "pt" ? "Tem certeza que deseja apagar este herói?" : "Are you sure you want to delete this hero?")) {
-                              deleteCharacterFromDb(char.id);
-                            }
-                          }}
-                          className="p-1.5 border border-red-500/30 hover:border-red-500 text-xs hover:bg-red-500/10"
-                          title="Delete Hero"
-                        >
-                          <Trash2 className="w-3.5 h-3.5 text-red-400" />
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
+          <HeroGallery
+            locale={locale}
+            records={savedCharacters}
+            onBack={() => { playCancel(); setCurrentScreen("title"); }}
+            onCreateFirst={startManualCreation}
+            onOpen={(sheet) => { playConfirm(); setActiveSheet(sheet); setCurrentScreen("sheet"); }}
+            onExport={handleExportJson}
+            onDelete={(id) => {
+              playCancel();
+              if (confirm(locale === "pt" ? "Tem certeza que deseja apagar este herói?" : "Are you sure you want to delete this hero?")) {
+                void deleteCharacterFromDb(id);
+              }
+            }}
+          />
         )}
 
         {/* ==================== MANUAL CREATION WIZARD ==================== */}
@@ -1500,250 +1129,25 @@ export default function App() {
           </div>
         )}
 
-        {/* ==================== CHARACTER SHEET DISPLAY ==================== */}
         {currentScreen === "sheet" && activeSheet && (
-          <div className="w-full max-w-3xl jrpg-container p-6 space-y-6 animate-[fadeIn_0.3s_ease-out]">
-            <div className="flex justify-between items-center border-b-2 border-white/20 pb-4">
-              <h2 className="pixel-font text-xs sm:text-sm text-yellow-300">
-                {strings.sheet.title}
-              </h2>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    saveCharacterToDb(activeSheet);
-                    playConfirm();
-                    alert(locale === "pt" ? "Herói salvo com sucesso no banco de dados!" : "Hero successfully saved to SQLite database!");
-                  }}
-                  className="jrpg-button px-3 py-1.5 text-[10px] flex items-center gap-1.5"
-                >
-                  <Save className="w-3 h-3 text-green-400" />
-                  {locale === "pt" ? "Salvar Herói" : "Save Hero"}
-                </button>
-
-                <button
-                  onClick={() => handleExportJson(activeSheet)}
-                  className="jrpg-button px-3 py-1.5 text-[10px] flex items-center gap-1.5"
-                >
-                  <Download className="w-3 h-3 text-cyan-400" />
-                  {locale === "pt" ? "Exportar" : "Export"}
-                </button>
-
-                <button
-                  onClick={() => {
-                    playCancel();
-                    setCurrentScreen("title");
-                  }}
-                  className="jrpg-button px-3 py-1.5 text-[10px]"
-                >
-                  {locale === "pt" ? "Menu Principal" : "Main Menu"}
-                </button>
-              </div>
-            </div>
-
-            {/* Character Info Panels JRPG Layout */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono text-xs">
-              {/* Left Column: Ident, Classes */}
-              <div className="space-y-4">
-                <div className="jrpg-panel p-4 space-y-2">
-                  <p className="text-[10px] text-gray-400 uppercase tracking-widest">{strings.sheet.name}</p>
-                  <p className="text-sm font-bold text-yellow-300">{activeSheet.name}</p>
-
-                  <p className="text-[10px] text-gray-400 uppercase tracking-widest mt-2">{strings.sheet.identity}</p>
-                  <p className="text-xs italic text-cyan-200">"{activeSheet.identity}"</p>
-
-                  <p className="text-[10px] text-gray-400 uppercase tracking-widest mt-2">{strings.sheet.theme}</p>
-                  <p className="text-xs text-white">{activeSheet.theme}</p>
-                </div>
-
-                <div className="jrpg-panel p-4 space-y-2">
-                  <p className="text-[10px] text-gray-400 uppercase tracking-widest">{strings.sheet.classesHeading}</p>
-                  <p className="text-[11px] text-yellow-300 font-bold">
-                    {strings.sheet.formatClassSummary(
-                      activeSheet.classes.map((c) => c.rpgClass.name),
-                      activeSheet.classes.map((c) => c.level)
-                    )}
-                  </p>
-                  <p className="text-[10px] text-cyan-400">Level 5 Hero</p>
-                </div>
-              </div>
-
-              {/* Center Column: Stats & Derived */}
-              <div className="space-y-4">
-                <div className="jrpg-panel p-4">
-                  <p className="text-[10px] text-gray-400 uppercase tracking-widest border-b border-white/10 pb-1 mb-2">
-                    {strings.sheet.attributesHeading}
-                  </p>
-                  <div className="grid grid-cols-2 gap-3">
-                    {strings.attributeOrder.map((key) => (
-                      <div key={key} className="flex justify-between items-center bg-black/20 p-2 border border-white/5">
-                        <span className="font-bold text-blue-300">{key}:</span>
-                        <span className="font-bold text-yellow-100">d{activeSheet.attributes[key] || 8}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="jrpg-panel p-4">
-                  <p className="text-[10px] text-gray-400 uppercase tracking-widest border-b border-white/10 pb-1 mb-2">
-                    {strings.sheet.derivedStatsHeading}
-                  </p>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="flex justify-between items-center bg-red-950/20 p-2 border border-red-900/30">
-                      <span className="font-bold text-red-400">{strings.sheet.hp}:</span>
-                      <span className="font-bold text-red-200">{activeSheet.derivedStats.hp}</span>
-                    </div>
-                    <div className="flex justify-between items-center bg-blue-950/20 p-2 border border-blue-900/30">
-                      <span className="font-bold text-blue-400">{strings.sheet.mp}:</span>
-                      <span className="font-bold text-blue-200">{activeSheet.derivedStats.mp}</span>
-                    </div>
-                    <div className="flex justify-between items-center bg-green-950/20 p-2 border border-green-900/30 col-span-2">
-                      <span className="font-bold text-green-400">{strings.sheet.ip}:</span>
-                      <span className="font-bold text-green-200">{activeSheet.derivedStats.ip}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Column: Combat / Protection */}
-              <div className="space-y-4">
-                <div className="jrpg-panel p-4 space-y-2">
-                  <p className="text-[10px] text-gray-400 uppercase tracking-widest border-b border-white/10 pb-1 mb-2">
-                    {locale === "pt" ? "DEFESAS" : "DEFENSES"}
-                  </p>
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">{strings.sheet.defense}:</span>
-                      <span className="font-bold text-yellow-300">{activeSheet.derivedStats.defense}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">{strings.sheet.magicDefense}:</span>
-                      <span className="font-bold text-yellow-300">{activeSheet.derivedStats.magicDefense}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">{strings.sheet.initiative}:</span>
-                      <span className="font-bold text-yellow-300">
-                        {activeSheet.derivedStats.initiative >= 0 ? "+" : ""}
-                        {activeSheet.derivedStats.initiative}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="jrpg-panel p-4 space-y-1.5">
-                  <p className="text-[10px] text-gray-400 uppercase tracking-widest border-b border-white/10 pb-1">
-                    {locale === "pt" ? "PROTEÇÕES EQUIPADAS" : "EQUIPPED ARMOR"}
-                  </p>
-                  <p className="text-[10px] text-cyan-300 leading-normal">
-                    🛡️ {activeSheet.equipment.armor?.name || strings.sheet.noArmor} <br />
-                    🛡️ {activeSheet.equipment.shield?.name || strings.sheet.noShield}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Combat Actions & Weapons */}
-            <div className="jrpg-panel p-4 space-y-3 font-mono text-xs">
-              <p className="text-[10px] text-yellow-300 font-bold border-b border-white/10 pb-1 mb-2 uppercase">
-                ⚔️ {strings.sheet.combatHeading}
-              </p>
-
-              <div className="space-y-2">
-                {activeSheet.equipment.weapons.map((w, idx) => (
-                  <div key={idx} className="bg-black/30 p-2.5 border border-white/10 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
-                    <div>
-                      <span className="font-bold text-yellow-200 text-sm">{w.name}</span>
-                      <span className="text-[10px] text-gray-400 block sm:inline sm:ml-2">({w.type === "melee" ? "Melee" : "Ranged"})</span>
-                    </div>
-                    <div className="text-[11px] text-cyan-300">
-                      {formatWeaponAttackString(w, activeSheet.attributes)}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="pt-2 text-[10px] text-gray-400 flex flex-col sm:flex-row justify-between border-t border-white/5 gap-2">
-                <span>
-                  {strings.sheet.equipmentSpent} {activeSheet.equipmentSpent}z
-                </span>
-                <span>
-                  💰 {strings.sheet.money} {activeSheet.money}z{" "}
-                  {strings.sheet.moneyRoll(
-                    activeSheet.moneyRoll.dice,
-                    activeSheet.moneyRoll.bonus,
-                    activeSheet.money - activeSheet.moneyRoll.bonus
-                  )}
-                </span>
-              </div>
-            </div>
-
-            {/* Powers list */}
-            <div className="jrpg-panel p-4 space-y-4 font-mono text-xs">
-              <p className="text-[10px] text-yellow-300 font-bold border-b border-white/10 pb-1 mb-2 uppercase">
-                ✨ {locale === "pt" ? "CLASSES & SEUS PODERES" : "POWERS REGISTRY"}
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {activeSheet.powers.map((p, idx) => (
-                  <div key={idx} className="bg-black/20 p-3 border border-white/5 space-y-1">
-                    <div className="flex justify-between border-b border-white/5 pb-1">
-                      <span className="font-bold text-yellow-100">{p.power.name}</span>
-                      <span className="text-[9px] bg-yellow-500/20 text-yellow-300 px-1.5 py-0.5 border border-yellow-400/30">
-                        {p.className}
-                      </span>
-                    </div>
-                    <p className="text-[10px] text-white/75 leading-relaxed pt-1">
-                      {p.power.mechanics || p.power.description}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Spells section */}
-            {activeSheet.spells.length > 0 && (
-              <div className="jrpg-panel p-4 space-y-4 font-mono text-xs">
-                <p className="text-[10px] text-yellow-300 font-bold border-b border-white/10 pb-1 mb-2 uppercase">
-                  🔮 {strings.sheet.spellsHeading}
-                </p>
-
-                <div className="space-y-3">
-                  {activeSheet.spells.map((s, idx) => {
-                    const isOffensive = s.spell.isOffensive;
-                    return (
-                      <div key={idx} className="bg-black/20 p-3 border border-white/5 space-y-2">
-                        <div className="flex justify-between items-center border-b border-white/5 pb-1.5">
-                          <div>
-                            <span className="font-bold text-cyan-200 text-sm">{s.spell.name}</span>
-                            <span className={`text-[8px] px-1.5 py-0.5 ml-2 font-bold ${
-                              isOffensive ? "bg-red-950/40 text-red-400 border border-red-500/30" : "bg-green-950/40 text-green-400 border border-green-500/30"
-                            }`}>
-                              {isOffensive ? strings.sheet.offensiveTag : strings.sheet.supportTag}
-                            </span>
-                          </div>
-
-                          <span className="text-[9px] text-gray-400">
-                            {s.className} · {s.grantedByPower}
-                          </span>
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-2 text-[10px] text-cyan-300 font-bold bg-black/40 p-1.5">
-                          <span>{strings.sheet.spellCost(s.spell.pmCost)}</span>
-                          <span>{strings.sheet.spellTarget(s.spell.target)}</span>
-                          <span>Duração: {s.spell.duration}</span>
-                        </div>
-
-                        <p className="text-[10px] text-white/80 leading-relaxed">
-                          {s.spell.mechanics}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
+          <CharacterSheetView
+            locale={locale}
+            strings={strings}
+            sheet={activeSheet}
+            onSave={(sheet) => {
+              void saveCharacterToDb(sheet);
+              playConfirm();
+              alert(locale === "pt" ? "Herói salvo com sucesso no banco de dados!" : "Hero successfully saved to SQLite database!");
+            }}
+            onExport={handleExportJson}
+            onBack={() => {
+              playCancel();
+              setCurrentScreen("title");
+            }}
+            formatWeaponAttack={formatWeaponAttackString}
+          />
         )}
+
       </main>
 
       {successModal && (

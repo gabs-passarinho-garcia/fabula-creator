@@ -6,7 +6,9 @@ class SoundManager {
 
   private initCtx() {
     if (!this.ctx) {
-      this.ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const AudioContextConstructor = window.AudioContext;
+      if (!AudioContextConstructor) return;
+      this.ctx = new AudioContextConstructor();
     }
     if (this.ctx.state === 'suspended') {
       this.ctx.resume();

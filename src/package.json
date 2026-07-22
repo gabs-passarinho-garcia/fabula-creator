@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "check": "bunx --bun tsc --noEmit",
+    "test": "bun test",
     "start": "bun run index.ts",
     "build": "bun run scripts/build.ts",
     "build:linux": "bun build ./index.ts --compile --minify --sourcemap --bytecode --target=bun-linux-x64 --outfile=dist/linux/fabula-creator",
