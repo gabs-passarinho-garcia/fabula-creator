@@ -42,6 +42,20 @@ export const exportCharacterSheet = async (sheet: CharacterSheet): Promise<strin
   return fileName;
 };
 
+/** Triggers the native browser/webview print dialog formatted for PDF export. */
+export const printCharacterSheetPDF = (sheet: CharacterSheet): void => {
+  const originalTitle = document.title;
+  const fileName = `${sheet.name.trim().replace(/\s+/g, "_") || "Heroi"}_Ficha_Fabula_Ultima`;
+  document.title = fileName;
+
+  window.print();
+
+  setTimeout(() => {
+    document.title = originalTitle;
+  }, 500);
+};
+
+
 /** Parses and minimally validates an imported character sheet JSON payload. */
 export const parseCharacterSheet = (json: string): CharacterSheet => {
   const sheet: unknown = JSON.parse(json);

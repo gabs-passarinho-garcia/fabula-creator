@@ -1,7 +1,9 @@
+import { useState } from "react";
 import type { Locale } from "../i18n/types";
 import type { LocaleStrings } from "../i18n/types";
 import type { AttributeStats, CharacterSheet, Weapon } from "../types";
-import { Download, Save } from "lucide-react";
+import { Download, FileText, Printer, Save, X } from "lucide-react";
+import { printCharacterSheetPDF } from "../services/characterFileService";
 
 interface CharacterSheetViewProps {
   locale: Locale;
@@ -23,43 +25,46 @@ export const CharacterSheetView = ({
   onBack,
   formatWeaponAttack,
 }: CharacterSheetViewProps) => {
+  const [showExportModal, setShowExportModal] = useState(false);
+
   return (
-          <div className="w-full max-w-3xl jrpg-container p-6 space-y-6 animate-[fadeIn_0.3s_ease-out]">
-            <div className="flex justify-between items-center border-b-2 border-white/20 pb-4">
-              <h2 className="pixel-font text-xs sm:text-sm text-yellow-300">
-                {strings.sheet.title}
-              </h2>
+    <div className="w-full max-w-3xl jrpg-container p-6 space-y-6 animate-[fadeIn_0.3s_ease-out] relative">
+      <div className="flex justify-between items-center border-b-2 border-white/20 pb-4 no-print">
+        <h2 className="pixel-font text-xs sm:text-sm text-yellow-300">
+          {strings.sheet.title}
+        </h2>
 
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    onSave(sheet);
-                    alert(locale === "pt" ? "Herói salvo com sucesso no banco de dados!" : "Hero successfully saved to SQLite database!");
-                  }}
-                  className="jrpg-button px-3 py-1.5 text-[10px] flex items-center gap-1.5"
-                >
-                  <Save className="w-3 h-3 text-green-400" />
-                  {locale === "pt" ? "Salvar Herói" : "Save Hero"}
-                </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => {
+              onSave(sheet);
+              alert(locale === "pt" ? "Herói salvo com sucesso no banco de dados!" : "Hero successfully saved to SQLite database!");
+            }}
+            className="jrpg-button px-3 py-1.5 text-[10px] flex items-center gap-1.5"
+          >
+            <Save className="w-3 h-3 text-green-400" />
+            {locale === "pt" ? "Salvar Herói" : "Save Hero"}
+          </button>
 
-                <button
-                  onClick={() => onExport(sheet)}
-                  className="jrpg-button px-3 py-1.5 text-[10px] flex items-center gap-1.5"
-                >
-                  <Download className="w-3 h-3 text-cyan-400" />
-                  {locale === "pt" ? "Exportar" : "Export"}
-                </button>
+          <button
+            onClick={() => setShowExportModal(true)}
+            className="jrpg-button px-3 py-1.5 text-[10px] flex items-center gap-1.5"
+          >
+            <Download className="w-3 h-3 text-cyan-400" />
+            {locale === "pt" ? "Exportar" : "Export"}
+          </button>
 
-                <button
-                  onClick={() => {
-                    onBack();
-                  }}
-                  className="jrpg-button px-3 py-1.5 text-[10px]"
-                >
-                  {locale === "pt" ? "Menu Principal" : "Main Menu"}
-                </button>
-              </div>
-            </div>
+          <button
+            onClick={() => {
+              onBack();
+            }}
+            className="jrpg-button px-3 py-1.5 text-[10px]"
+          >
+            {locale === "pt" ? "Menu Principal" : "Main Menu"}
+          </button>
+        </div>
+      </div>
+
 
             {/* Character Info Panels JRPG Layout */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono text-xs">
@@ -261,7 +266,86 @@ export const CharacterSheetView = ({
                   })}
                 </div>
               </div>
-              )}
+            )}
+
+      {/* Export Options Modal */}
+      {showExportModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 no-print animate-[fadeIn_0.15s_ease-out]">
+          <div className="jrpg-panel max-w-sm w-full p-5 space-y-4 shadow-2xl relative border-2 border-yellow-300">
+            <div className="flex justify-between items-center border-b border-white/20 pb-2">
+              <h3 className="pixel-font text-xs text-yellow-300 flex items-center gap-2">
+                <Download className="w-4 h-4 text-cyan-400" />
+                {locale === "pt" ? "EXPORTAR HERÓI" : "EXPORT HERO"}
+              </h3>
+              <button
+                onClick={() => setShowExportModal(false)}
+                className="text-gray-400 hover:text-white p-1"
+                aria-label="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
-        );
-      };
+
+            <p className="text-[11px] text-gray-300 font-mono">
+              {locale === "pt"
+                ? "Escolha como deseja exportar esta ficha:"
+                : "Choose how to export this character sheet:"}
+            </p>
+
+            <div className="space-y-2.5 font-mono">
+              <button
+                onClick={() => {
+                  setShowExportModal(false);
+                  printCharacterSheetPDF(sheet);
+                }}
+                className="w-full jrpg-button p-3 text-left flex items-start gap-3 hover:border-yellow-300 group cursor-pointer"
+              >
+                <Printer className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
+                <div>
+                  <div className="text-xs font-bold text-yellow-200 group-hover:text-white">
+                    {locale === "pt" ? "📄 Exportar como PDF (Visual)" : "📄 Export as PDF (Visual)"}
+                  </div>
+                  <div className="text-[10px] text-gray-400 font-sans mt-0.5 leading-normal">
+                    {locale === "pt"
+                      ? "Gera um PDF formatado com layout A4 nítido pronto para impressão ou guardar no disco."
+                      : "Generates a clean visual PDF formatted for A4 printing."}
+                  </div>
+                </div>
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowExportModal(false);
+                  onExport(sheet);
+                }}
+                className="w-full jrpg-button p-3 text-left flex items-start gap-3 hover:border-cyan-300 group cursor-pointer"
+              >
+                <FileText className="w-5 h-5 text-cyan-400 shrink-0 mt-0.5" />
+                <div>
+                  <div className="text-xs font-bold text-cyan-200 group-hover:text-white">
+                    {locale === "pt" ? "💾 Exportar como JSON (Dados)" : "💾 Export as JSON (Data)"}
+                  </div>
+                  <div className="text-[10px] text-gray-400 font-sans mt-0.5 leading-normal">
+                    {locale === "pt"
+                      ? "Baixa o arquivo .json de dados para fazer backup e reimportar no futuro."
+                      : "Downloads a .json file for backup and re-importing later."}
+                  </div>
+                </div>
+              </button>
+            </div>
+
+            <div className="pt-2 text-right">
+              <button
+                onClick={() => setShowExportModal(false)}
+                className="jrpg-button px-3 py-1 text-[10px]"
+              >
+                {locale === "pt" ? "Cancelar" : "Cancel"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
