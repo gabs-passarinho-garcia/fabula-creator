@@ -12,6 +12,15 @@ import {
   formatEquipmentOptionLabel,
   selectRandomEquipment,
 } from './equipment.ts';
+import {
+  adjustRank,
+  canIncrease,
+  purchaseRandomPowers,
+  rankOf,
+  remainingPurchases,
+  selectSpellsForRanks,
+  spellGrantSlots,
+} from './powerRanks.ts';
 import type {
   AttributeStats,
   CharacterCreationData,
@@ -270,30 +279,28 @@ const extractRpgClasses = (selectedClasses: SelectedClass[]): RpgClass[] =>
 
 /**
  * Randomly selects powers for a level 5 character based on their classes,
- * tagging each one with its source class name for later grouping/display.
+ * allocating stacked ranks up to maxLevel for each invested class level.
  * @param selectedClasses - Selected RPG classes with level allocations
  */
 const selectPowers = (selectedClasses: SelectedClass[]): SelectedPower[] =>
-  selectedClasses.flatMap(({ rpgClass, level }) =>
-    sampleSize(rpgClass.powers, level).map((power) => ({
-      power,
-      className: rpgClass.name,
-    })),
-  );
+  purchaseRandomPowers(selectedClasses, { next: () => Math.random() });
 
 /**
- * Formats a power as a selectable prompt option, truncating its description.
+ * Formats a power as a selectable prompt option, showing NP current/max and truncating description.
  * @param power - Class power to format
+ * @param currentRank - Current owned rank
+ * @param strings - Active locale strings for NP label formatting
  */
-const formatPowerOptionLabel = (power: ClassPower): string => {
+const formatPowerOptionLabel = (power: ClassPower, currentRank: number, strings: LocaleStrings): string => {
   const truncatedDesc =
-    power.description.length > 60 ? `${power.description.substring(0, 60)}...` : power.description;
-  return `${power.name} ${pc.dim(`- ${truncatedDesc}`)}`;
+    power.description.length > 50 ? `${power.description.substring(0, 50)}...` : power.description;
+  const rankTag = pc.cyan(`[${strings.sheet.powerRank(currentRank, power.maxLevel)}]`);
+  return `${power.name} ${rankTag} ${pc.dim(`- ${truncatedDesc}`)}`;
 };
 
 /**
  * Prompts the user to manually select powers for their chosen classes,
- * picking one unique power per invested class level.
+ * spending each class level as a power purchase (allowing stacked ranks up to maxLevel).
  * @param selectedClasses - Selected RPG classes with level allocations
  * @param strings - Active locale strings
  */
@@ -303,28 +310,31 @@ const promptPowerSelection = async (
 ): Promise<SelectedPower[]> =>
   selectedClasses.reduce<Promise<SelectedPower[]>>(async (allPowersPromise, { rpgClass, level }) => {
     const allPowers = await allPowersPromise;
-    const availablePowers = rpgClass.powers;
 
     const selectedForClass = await Array.from({ length: level }).reduce<Promise<SelectedPower[]>>(
-      async (classPowersPromise, _, index) => {
+      async (classPowersPromise) => {
         const classPowers = await classPowersPromise;
-        const pickedNames = new Set(classPowers.map((p) => p.power.name));
-        const options = availablePowers.filter((p) => !pickedNames.has(p.name));
-        const remaining = level - index;
+        const remaining = remainingPurchases(level, classPowers, rpgClass.name);
+        const options = rpgClass.powers.filter((p) =>
+          canIncrease(p, rankOf(classPowers, rpgClass.name, p.name), remaining),
+        );
 
         const powerName = await awaitPrompt(
           select({
             message: strings.prompts.selectPower(rpgClass.name, remaining),
-            options: options.map((p) => ({
-              value: p.name,
-              label: formatPowerOptionLabel(p),
-            })),
+            options: options.map((p) => {
+              const current = rankOf(classPowers, rpgClass.name, p.name);
+              return {
+                value: p.name,
+                label: formatPowerOptionLabel(p, current, strings),
+              };
+            }),
           }),
           strings,
         );
 
         const power = options.find((p) => p.name === powerName)!;
-        return [...classPowers, { power, className: rpgClass.name }];
+        return adjustRank(classPowers, rpgClass.name, power, 1, level);
       },
       Promise.resolve([]),
     );
@@ -433,8 +443,7 @@ const promptSelectedClasses = async (
 };
 
 /**
- * Prompts the user to pick one spell for each spell-granting power they own,
- * used in the step-by-step manual character creation flow.
+ * Prompts the user to pick one spell for each grant slot of their ranked spell powers.
  * @param selectedPowers - Powers already chosen for the character
  * @param classes - Selected RPG classes (source of each class's spell list)
  * @param strings - Active locale strings
@@ -444,20 +453,25 @@ const promptSpellSelection = async (
   classes: RpgClass[],
   strings: LocaleStrings,
 ): Promise<SelectedSpell[]> => {
-  const spellGrantingPowers = filterSpellGrantingPowers(selectedPowers);
+  const slots = spellGrantSlots(selectedPowers);
 
-  return spellGrantingPowers.reduce<Promise<SelectedSpell[]>>(async (accPromise, { power, className }) => {
+  return slots.reduce<Promise<SelectedSpell[]>>(async (accPromise, slot) => {
     const acc = await accPromise;
-    const rpgClass = classes.find((c) => c.name === className);
+    const rpgClass = classes.find((c) => c.name === slot.className);
     const availableSpells = rpgClass?.spells ?? [];
     if (availableSpells.length === 0) return acc;
+
+    const ownerPower = selectedPowers.find(
+      (entry) => entry.className === slot.className && entry.power.name === slot.powerName,
+    );
+    const totalRank = ownerPower?.rank ?? 1;
 
     const alreadyLearned = new Set(acc.map((entry) => entry.spell.name));
     const options = pickUnlearnedSpell(availableSpells, alreadyLearned);
 
     const spellName = await awaitPrompt(
       select({
-        message: strings.prompts.selectSpell(className, power.name),
+        message: strings.prompts.selectSpell(slot.className, slot.powerName, slot.grantIndex + 1, totalRank),
         options: options.map((spell) => ({
           value: spell.name,
           label: formatSpellOptionLabel(spell, strings),
@@ -469,47 +483,17 @@ const promptSpellSelection = async (
     const spell = options.find((entry) => entry.name === spellName);
     if (!spell) return acc;
 
-    return [...acc, { spell, className, grantedByPower: power.name }];
+    return [...acc, { spell, className: slot.className, grantedByPower: slot.powerName, grantIndex: slot.grantIndex }];
   }, Promise.resolve([]));
 };
 
 /**
- * Filters the powers that unlock spell learning (flagged as `grantsSpell`
- * in the game data, e.g. "Magia Elemental", "Magia Entrópica").
- * @param selectedPowers - Powers already chosen for the character
- */
-const filterSpellGrantingPowers = (selectedPowers: SelectedPower[]): SelectedPower[] =>
-  selectedPowers.filter(({ power }) => power.grantsSpell === true);
-
-/**
- * Picks a spell for a given class that hasn't already been learned in this
- * selection batch, falling back to the full list if all are already taken.
- * @param availableSpells - Full spell list for the granting class
- * @param alreadyLearned - Spell names already picked in this selection
- */
-const pickUnlearnedSpell = (availableSpells: Spell[], alreadyLearned: Set<string>): Spell[] => {
-  const learnable = availableSpells.filter((spell) => !alreadyLearned.has(spell.name));
-  return learnable.length > 0 ? learnable : availableSpells;
-};
-
-/**
- * Randomly learns one spell per spell-granting power the character has,
- * used in the fully-random character generation flow.
+ * Randomly learns one distinct spell per grant slot of spell-granting powers.
  * @param selectedPowers - Powers already chosen for the character
  * @param classes - Selected RPG classes (source of each class's spell list)
  */
 const selectRandomSpells = (selectedPowers: SelectedPower[], classes: RpgClass[]): SelectedSpell[] =>
-  filterSpellGrantingPowers(selectedPowers).reduce<SelectedSpell[]>((acc, { power, className }) => {
-    const rpgClass = classes.find((c) => c.name === className);
-    const availableSpells = rpgClass?.spells ?? [];
-    if (availableSpells.length === 0) return acc;
-
-    const alreadyLearned = new Set(acc.map((entry) => entry.spell.name));
-    const spell = sample(pickUnlearnedSpell(availableSpells, alreadyLearned));
-    if (!spell) return acc;
-
-    return [...acc, { spell, className, grantedByPower: power.name }];
-  }, []);
+  selectSpellsForRanks(selectedPowers, classes, (pool) => sample(pool)!);
 
 /**
  * Formats a spell as a selectable prompt option, showing its PM cost, target
@@ -776,10 +760,10 @@ const generateManualCharacter = async (
  * order, so the sheet can render a per-class section instead of a flat list.
  * @param powers - Powers tagged with their source class
  */
-const groupPowersByClass = (powers: SelectedPower[]): Map<string, ClassPower[]> =>
-  powers.reduce<Map<string, ClassPower[]>>((map, { power, className }) => {
-    const existing = map.get(className) ?? [];
-    map.set(className, [...existing, power]);
+const groupPowersByClass = (powers: SelectedPower[]): Map<string, SelectedPower[]> =>
+  powers.reduce<Map<string, SelectedPower[]>>((map, entry) => {
+    const existing = map.get(entry.className) ?? [];
+    map.set(entry.className, [...existing, entry]);
     return map;
   }, new Map());
 
@@ -834,9 +818,10 @@ const displayCharacterSheet = (character: CharacterSheet, strings: LocaleStrings
   const powersByClass = groupPowersByClass(character.powers);
   Array.from(powersByClass.entries()).forEach(([className, powers]) => {
     console.log(pc.bold(pc.yellow(`\n  ${className}`)));
-    powers.forEach((power) => {
+    powers.forEach(({ power, rank }) => {
       const details = power.mechanics ?? power.description;
-      console.log(`    ✨  ${pc.magenta(power.name)}: ${pc.gray(details)}`);
+      const rankTag = pc.cyan(`[${sheet.powerRank(rank, power.maxLevel)}]`);
+      console.log(`    ✨  ${pc.magenta(power.name)} ${rankTag}: ${pc.gray(details)}`);
     });
   });
 

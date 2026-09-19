@@ -153,6 +153,8 @@ export interface SelectedClass {
 export interface SelectedPower {
   power: ClassPower;
   className: string;
+  /** Current skill rank (NP). Catalog `maxLevel` remains the ceiling. */
+  rank: number;
 }
 
 /** A learned spell tagged with its class and the power that granted it. */
@@ -160,6 +162,8 @@ export interface SelectedSpell {
   spell: Spell;
   className: string;
   grantedByPower: string;
+  /** Zero-based slot among the `rank` spells granted by that power. */
+  grantIndex: number;
 }
 
 export interface CharacterSheet {

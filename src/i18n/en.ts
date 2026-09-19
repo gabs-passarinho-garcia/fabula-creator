@@ -37,8 +37,11 @@ export const en: LocaleStrings = {
     formatCost: (cost) => `${cost}z`,
     selectPower: (className, remaining) =>
       `Choose a power for ${className} (${remaining} left):`,
-    selectSpell: (className, powerName) =>
-      `Select a spell for ${className} (granted by ${powerName}):`,
+    choosePowersHint:
+      "Spend each class level on a power. The same power can rise in SL up to its maximum.",
+    remainingPurchases: (remaining, total) => `Purchases left: ${remaining} / ${total}`,
+    selectSpell: (className, powerName, slot, total) =>
+      `Select spell ${slot} of ${total} for ${className} (granted by ${powerName}):`,
   },
   defaults: {
     randomHeroName: 'Random Hero',
@@ -107,5 +110,6 @@ export const en: LocaleStrings = {
     spellCost: (cost) => `Cost: ${cost} MP`,
     spellTarget: (target) => `Target: ${target}`,
     spellDuration: (duration) => `Duration: ${duration}`,
+    powerRank: (rank, maxLevel) => `SL ${rank}/${maxLevel}`,
   },
 };

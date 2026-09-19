@@ -211,11 +211,16 @@ export const CharacterSheetView = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {sheet.powers.map((p, idx) => (
                   <div key={idx} className="bg-black/20 p-3 border border-white/5 space-y-1">
-                    <div className="flex justify-between border-b border-white/5 pb-1">
+                    <div className="flex justify-between items-center border-b border-white/5 pb-1">
                       <span className="font-bold text-yellow-100">{p.power.name}</span>
-                      <span className="text-[9px] bg-yellow-500/20 text-yellow-300 px-1.5 py-0.5 border border-yellow-400/30">
-                        {p.className}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[9px] bg-yellow-500/20 text-yellow-300 px-1.5 py-0.5 border border-yellow-400/30">
+                          {p.className}
+                        </span>
+                        <span className="text-[9px] bg-cyan-950 text-cyan-300 px-1.5 py-0.5 border border-cyan-400/30 font-bold">
+                          {strings.sheet.powerRank(p.rank, p.power.maxLevel)}
+                        </span>
+                      </div>
                     </div>
                     <p className="text-[10px] text-white/75 leading-relaxed pt-1">
                       {p.power.mechanics || p.power.description}

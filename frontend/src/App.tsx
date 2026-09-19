@@ -29,6 +29,17 @@ import {
 import confetti from "canvas-confetti";
 import { calculateDerivedStats } from "./domain/characterStats";
 import { generateRandomCharacter } from "./domain/characterCreation";
+import {
+  adjustRank,
+  areClassPowerBudgetsSpent,
+  canDecrease,
+  canIncrease,
+  rankOf,
+  remainingPurchases,
+  spellGrantSlots,
+  sumRanks,
+  trimSpellsForPowerRanks,
+} from "./domain/powerRanks";
 import { isTauriRuntime } from "./shared/tauri";
 import { exportCharacterSheet, parseCharacterSheet } from "./services/characterFileService";
 import type { CharacterRepository, SavedCharacterRecord } from "./services/characterRepository";
@@ -260,27 +271,19 @@ export default function App() {
     return Object.values(classLevels).reduce((acc, l) => acc + l, 0);
   };
 
-  const handleSelectPower = (className: string, power: ClassPower, levelIdx: number) => {
+  const handleAdjustPowerRank = (className: string, power: ClassPower, delta: number, classLevel: number) => {
     playConfirm();
-
-    // Check if power already chosen for this class
-    const filteredPowers = selectedPowers.filter((p) => p.className === className && p.power.name === power.name);
-    if (filteredPowers.length > 0) {
-      return; // Already chosen
-    }
-
-    // Replace power for this specific slot if already exists, else append
-    const cleanPowers = selectedPowers.filter((p) => !(p.className === className && p.power.maxLevel === levelIdx));
-    setSelectedPowers([...cleanPowers, { power, className }]);
+    const updatedPowers = adjustRank(selectedPowers, className, power, delta, classLevel);
+    setSelectedPowers(updatedPowers);
+    setSelectedSpells(trimSpellsForPowerRanks(selectedSpells, updatedPowers));
   };
 
-  const handleSelectSpell = (className: string, grantedByPower: string, spell: Spell) => {
+  const handleSelectSpell = (className: string, grantedByPower: string, grantIndex: number, spell: Spell) => {
     playConfirm();
-    // Remove previous spell for this class & power
     const filteredSpells = selectedSpells.filter(
-      (s) => !(s.className === className && s.grantedByPower === grantedByPower)
+      (s) => !(s.className === className && s.grantedByPower === grantedByPower && s.grantIndex === grantIndex),
     );
-    setSelectedSpells([...filteredSpells, { spell, className, grantedByPower }]);
+    setSelectedSpells([...filteredSpells, { spell, className, grantedByPower, grantIndex }]);
   };
 
   const handleFinishManualCharacter = () => {
@@ -508,8 +511,8 @@ export default function App() {
                       (manualStep === 1 && !name) ||
                       (manualStep === 2 && statDicePool.length > 0) ||
                       (manualStep === 3 && (selectedClasses.length === 0 || sumLevels() !== 5)) ||
-                      (manualStep === 4 && selectedPowers.length < sumLevels()) ||
-                      (manualStep === 5 && selectedPowers.filter((p) => p.power.grantsSpell).length > selectedSpells.length)
+                      (manualStep === 4 && !areClassPowerBudgetsSpent(selectedClasses.map((rc) => ({ rpgClass: rc, level: classLevels[rc.name] || 1 })), selectedPowers)) ||
+                      (manualStep === 5 && spellGrantSlots(selectedPowers).length > selectedSpells.length)
                     }
                     className="jrpg-button px-3 py-1.5 text-[10px] disabled:opacity-50"
                   >
@@ -841,70 +844,70 @@ export default function App() {
             {manualStep === 4 && (
               <div className="space-y-6">
                 <p className="text-xs font-mono text-blue-300">
-                  {locale === "pt"
-                    ? "Escolha um poder único para cada nível de suas classes escolhidas"
-                    : "Select a unique power for each of your selected class levels"}
+                  {strings.prompts.choosePowersHint}
                 </p>
 
                 <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                   {selectedClasses.map((rc) => {
-                    const lvl = classLevels[rc.name] || 1;
+                    const classLevel = classLevels[rc.name] || 1;
+                    const remaining = remainingPurchases(classLevel, selectedPowers, rc.name);
 
                     return (
                       <div key={rc.name} className="space-y-3 bg-black/20 p-4 border border-white/10">
-                        <h3 className="pixel-font text-xs text-yellow-300">
-                          {rc.name} (Lvl {lvl})
-                        </h3>
+                        <div className="flex justify-between items-center border-b border-white/10 pb-2">
+                          <h3 className="pixel-font text-xs text-yellow-300">
+                            {rc.name} (Lvl {classLevel})
+                          </h3>
+                          <span className="text-[10px] font-mono text-cyan-300 font-bold">
+                            {strings.prompts.remainingPurchases(remaining, classLevel)}
+                          </span>
+                        </div>
 
-                        {/* Slots for this class levels */}
-                        {Array.from({ length: lvl }).map((_, levelIdx) => {
-                          // Find chosen power for this slot
-                          const currentChosen = selectedPowers.find(
-                            (p) => p.className === rc.name && p.power.maxLevel === levelIdx
-                          );
+                        <div className="grid grid-cols-1 gap-2">
+                          {rc.powers.map((power) => {
+                            const currentRank = rankOf(selectedPowers, rc.name, power.name);
+                            const canInc = canIncrease(power, currentRank, remaining);
+                            const canDec = canDecrease(currentRank);
 
-                          return (
-                            <div key={levelIdx} className="space-y-2">
-                              <span className="text-[10px] font-mono text-gray-400 uppercase tracking-widest block">
-                                Slot Power {levelIdx + 1}
-                              </span>
+                            return (
+                              <div
+                                key={power.name}
+                                className={`p-2.5 border font-mono text-xs flex justify-between items-center transition ${
+                                  currentRank > 0
+                                    ? "border-yellow-400 bg-yellow-400/10 text-yellow-300"
+                                    : "border-white/10 hover:border-white/50"
+                                }`}
+                              >
+                                <div>
+                                  <p className="font-bold text-[11px]">{power.name}</p>
+                                  <p className="text-[10px] text-white/60 mt-0.5">
+                                    {power.description}
+                                  </p>
+                                </div>
 
-                              <div className="grid grid-cols-1 gap-2">
-                                {rc.powers.map((power) => {
-                                  const isSelectedForClass = selectedPowers.some(
-                                    (p) => p.className === rc.name && p.power.name === power.name
-                                  );
-                                  const isChosenThisSlot = currentChosen?.power.name === power.name;
-
-                                  return (
-                                    <button
-                                      key={power.name}
-                                      onClick={() => {
-                                        const pToSave = { ...power, maxLevel: levelIdx };
-                                        handleSelectPower(rc.name, pToSave, levelIdx);
-                                      }}
-                                      disabled={isSelectedForClass && !isChosenThisSlot}
-                                      className={`p-2.5 border text-left font-mono text-xs flex justify-between items-start transition ${
-                                        isChosenThisSlot
-                                          ? "border-yellow-400 bg-yellow-400/10 text-yellow-300"
-                                          : isSelectedForClass
-                                          ? "opacity-30 border-white/5 cursor-not-allowed"
-                                          : "border-white/10 hover:border-white/50"
-                                      }`}
-                                    >
-                                      <div>
-                                        <p className="font-bold text-[11px]">{power.name}</p>
-                                        <p className="text-[10px] text-white/60 mt-1">
-                                          {power.description}
-                                        </p>
-                                      </div>
-                                    </button>
-                                  );
-                                })}
+                                <div className="flex items-center gap-2 shrink-0 ml-4">
+                                  <span className="text-xs font-bold px-1.5 py-0.5 bg-black/40 border border-white/20">
+                                    {strings.sheet.powerRank(currentRank, power.maxLevel)}
+                                  </span>
+                                  <button
+                                    disabled={!canDec}
+                                    onClick={() => handleAdjustPowerRank(rc.name, power, -1, classLevel)}
+                                    className="w-7 h-7 flex items-center justify-center border border-white/30 text-xs font-bold hover:border-white disabled:opacity-30"
+                                  >
+                                    -
+                                  </button>
+                                  <button
+                                    disabled={!canInc}
+                                    onClick={() => handleAdjustPowerRank(rc.name, power, 1, classLevel)}
+                                    className="w-7 h-7 flex items-center justify-center border border-white/30 text-xs font-bold hover:border-white disabled:opacity-30"
+                                  >
+                                    +
+                                  </button>
+                                </div>
                               </div>
-                            </div>
-                          );
-                        })}
+                            );
+                          })}
+                        </div>
                       </div>
                     );
                   })}
@@ -917,14 +920,14 @@ export default function App() {
               <div className="space-y-6">
                 <p className="text-xs font-mono text-blue-300">
                   {locale === "pt"
-                    ? "Para cada poder de conjuração que você adquiriu, escolha uma magia correspondente"
-                    : "For each spell-granting power acquired, select a corresponding starting spell"}
+                    ? "Para cada nível de um poder de conjuração, escolha uma magia correspondente"
+                    : "For each rank of a spell-granting power, select a corresponding spell"}
                 </p>
 
                 {(() => {
-                  const spellGrantingPowers = selectedPowers.filter((p) => p.power.grantsSpell);
+                  const slots = spellGrantSlots(selectedPowers);
 
-                  if (spellGrantingPowers.length === 0) {
+                  if (slots.length === 0) {
                     return (
                       <div className="jrpg-panel p-6 text-center text-green-400 font-mono text-xs">
                         {locale === "pt"
@@ -936,19 +939,28 @@ export default function App() {
 
                   return (
                     <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
-                      {spellGrantingPowers.map(({ power, className }, idx) => {
-                        const rc = selectedClasses.find((c) => c.name === className);
+                      {slots.map((slot, idx) => {
+                        const rc = selectedClasses.find((c) => c.name === slot.className);
                         const spells = rc?.spells || [];
+                        const ownerPower = selectedPowers.find(
+                          (entry) => entry.className === slot.className && entry.power.name === slot.powerName,
+                        );
+                        const totalRank = ownerPower?.rank ?? 1;
                         const chosenSpell = selectedSpells.find(
-                          (s) => s.className === className && s.grantedByPower === power.name
+                          (s) =>
+                            s.className === slot.className &&
+                            s.grantedByPower === slot.powerName &&
+                            s.grantIndex === slot.grantIndex,
                         );
 
                         return (
                           <div key={idx} className="space-y-3 bg-black/20 p-4 border border-white/10">
                             <div className="flex justify-between items-center border-b border-white/10 pb-2">
-                              <span className="pixel-font text-xs text-yellow-300">{className}</span>
+                              <span className="pixel-font text-xs text-yellow-300">
+                                {strings.prompts.selectSpell(slot.className, slot.powerName, slot.grantIndex + 1, totalRank)}
+                              </span>
                               <span className="text-[10px] font-mono text-cyan-300 font-bold uppercase tracking-widest">
-                                Granted by: {power.name}
+                                {slot.powerName} #{slot.grantIndex + 1}
                               </span>
                             </div>
 
@@ -958,7 +970,7 @@ export default function App() {
                                 return (
                                   <button
                                     key={spell.name}
-                                    onClick={() => handleSelectSpell(className, power.name, spell)}
+                                    onClick={() => handleSelectSpell(slot.className, slot.powerName, slot.grantIndex, spell)}
                                     className={`p-3 border text-left font-mono text-xs flex flex-col gap-1 transition ${
                                       isSelected
                                         ? "border-yellow-400 bg-yellow-400/10 text-yellow-300"

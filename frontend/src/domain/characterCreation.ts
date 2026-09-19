@@ -10,6 +10,7 @@ import type {
   SelectedSpell,
 } from "../types";
 import { calculateDerivedStats } from "./characterStats";
+import { purchaseRandomPowers, selectSpellsForRanks, sumRanks } from "./powerRanks";
 
 export interface RandomSource {
   next: () => number;
@@ -49,27 +50,15 @@ const distributeLevels = (classCount: number, random: RandomSource): number[] =>
   return levels;
 };
 
-const selectRandomPowers = (classes: SelectedClass[], random: RandomSource): SelectedPower[] =>
-  classes.flatMap(({ rpgClass, level }) =>
-    shuffled(rpgClass.powers, random).slice(0, level).map((power) => ({
-      power,
-      className: rpgClass.name,
-    })),
-  );
+const selectRandomPowers = (classes: SelectedClass[], random: RandomSource) =>
+  purchaseRandomPowers(classes, random);
 
 const selectRandomSpells = (
   powers: SelectedPower[],
   classes: RpgClass[],
   random: RandomSource,
-): SelectedSpell[] => powers
-  .filter(({ power }) => power.grantsSpell)
-  .reduce<SelectedSpell[]>((selected, { power, className }) => {
-    const rpgClass = classes.find((entry) => entry.name === className);
-    const available = rpgClass?.spells ?? [];
-    const unlearned = available.filter((spell) => !selected.some((entry) => entry.spell.name === spell.name));
-    const spell = pick(unlearned.length > 0 ? unlearned : available, random);
-    return available.length > 0 ? [...selected, { spell, className, grantedByPower: power.name }] : selected;
-  }, []);
+): SelectedSpell[] =>
+  selectSpellsForRanks(powers, classes, (available) => pick(available, random));
 
 /**
  * Generates a valid level-five character without touching React, Tauri, or the DOM.

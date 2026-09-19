@@ -32,8 +32,12 @@ export interface LocaleStrings {
     formatCost: (cost: number) => string;
     /** Prompts the user to select a class power */
     selectPower: (className: string, remaining: number) => string;
-    /** Prompts the user to select a spell granted by a specific class power */
-    selectSpell: (className: string, powerName: string) => string;
+    /** Explains that class levels are spent as stackable power ranks */
+    choosePowersHint: string;
+    /** Shows unspent power purchases for a class */
+    remainingPurchases: (remaining: number, total: number) => string;
+    /** Prompts the user to select a spell granted by a ranked class power */
+    selectSpell: (className: string, powerName: string, slot: number, total: number) => string;
   };
   defaults: {
     randomHeroName: string;
@@ -108,5 +112,7 @@ export interface LocaleStrings {
     spellTarget: (target: string) => string;
     /** Formats the duration of a spell */
     spellDuration: (duration: string) => string;
+    /** Formats current skill rank versus catalog maximum */
+    powerRank: (rank: number, maxLevel: number) => string;
   };
 }
