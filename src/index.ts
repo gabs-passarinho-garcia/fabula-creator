@@ -45,7 +45,7 @@ interface DieSlot {
 }
 
 const STARTING_CLASS_LEVELS = 5;
-const MIN_CLASSES = 1;
+const MIN_CLASSES = 2;
 const MAX_CLASSES = 3;
 
 /**
@@ -350,7 +350,7 @@ const promptClassCount = async (strings: LocaleStrings): Promise<number> =>
   awaitPrompt(
     select({
       message: strings.prompts.classCount,
-      options: Array.from({ length: MAX_CLASSES }, (_, index) => {
+      options: Array.from({ length: MAX_CLASSES - MIN_CLASSES + 1 }, (_, index) => {
         const count = index + MIN_CLASSES;
         return { value: count, label: String(count) };
       }),
@@ -627,7 +627,7 @@ const generateRandomCharacter = (data: CharacterCreationData, strings: LocaleStr
   const attributes = assignAttributesRandomly(attributeProfile, strings);
 
   const selectedClasses = (() => {
-    const classCount = Math.floor(Math.random() * MAX_CLASSES) + MIN_CLASSES;
+    const classCount = Math.floor(Math.random() * (MAX_CLASSES - MIN_CLASSES + 1)) + MIN_CLASSES;
     const pickedClasses = sampleSize(data.classes, classCount);
     const levels = distributeLevelsRandomly(classCount);
     return buildSelectedClasses(pickedClasses, levels);

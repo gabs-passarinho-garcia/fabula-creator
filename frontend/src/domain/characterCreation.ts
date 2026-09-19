@@ -76,7 +76,7 @@ export const generateRandomCharacter = (
   const detail = pick(data.identityTables.details, random);
   const theme = pick(data.themes, random).name;
   const attributes = assignRandomAttributes(pick(data.attributes.arrays, random).values, strings, random);
-  const classCount = Math.floor(random.next() * 3) + 1;
+  const classCount = Math.floor(random.next() * 2) + 2;
   const pickedClasses = shuffled(data.classes, random).slice(0, classCount);
   const levels = distributeLevels(classCount, random);
   const classes = pickedClasses.map((rpgClass, index) => ({ rpgClass, level: levels[index] ?? 1 }));

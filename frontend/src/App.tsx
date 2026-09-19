@@ -82,7 +82,7 @@ export default function App() {
   const [statAssignments, setStatAssignments] = useState<Record<string, number>>({});
 
   // Classes
-  const [classCount, setClassCount] = useState<number>(1);
+  const [classCount, setClassCount] = useState<number>(2);
   const [selectedClasses, setSelectedClasses] = useState<RpgClass[]>([]);
   const [classLevels, setClassLevels] = useState<Record<string, number>>({});
 
@@ -181,7 +181,7 @@ export default function App() {
     }, {} as AttributeStats);
     setAssignedStats(initialStats);
 
-    setClassCount(1);
+    setClassCount(2);
     setSelectedClasses([]);
     setClassLevels({});
     setSelectedPowers([]);
@@ -510,7 +510,7 @@ export default function App() {
                     disabled={
                       (manualStep === 1 && !name) ||
                       (manualStep === 2 && statDicePool.length > 0) ||
-                      (manualStep === 3 && (selectedClasses.length === 0 || sumLevels() !== 5)) ||
+                      (manualStep === 3 && (selectedClasses.length < 2 || sumLevels() !== 5)) ||
                       (manualStep === 4 && !areClassPowerBudgetsSpent(selectedClasses.map((rc) => ({ rpgClass: rc, level: classLevels[rc.name] || 1 })), selectedPowers)) ||
                       (manualStep === 5 && spellGrantSlots(selectedPowers).length > selectedSpells.length)
                     }
@@ -736,7 +736,7 @@ export default function App() {
                   </span>
 
                   <div className="flex gap-2">
-                    {[1, 2, 3].map((num) => (
+                    {[2, 3].map((num) => (
                       <button
                         key={num}
                         onClick={() => {

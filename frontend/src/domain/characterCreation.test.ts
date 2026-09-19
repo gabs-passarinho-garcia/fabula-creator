@@ -19,7 +19,7 @@ describe("generateRandomCharacter", () => {
     const sheet = generateRandomCharacter(data, strings, random);
     const uniqueKeys = new Set(sheet.powers.map((entry) => `${entry.className}:${entry.power.name}`));
 
-    expect(sheet.classes.length).toBeGreaterThanOrEqual(1);
+    expect(sheet.classes.length).toBeGreaterThanOrEqual(2);
     expect(sheet.classes.length).toBeLessThanOrEqual(3);
     expect(sheet.classes.reduce((total, selected) => total + selected.level, 0)).toBe(5);
     expect(sumRanks(sheet.powers)).toBe(5);
