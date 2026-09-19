@@ -49,6 +49,20 @@ impl CharacterDatabase {
     Ok(connection.last_insert_rowid())
   }
 
+  /// Overwrites an existing character, keeping its id and creation timestamp.
+  pub fn update(&self, id: i64, name: &str, sheet_json: &str) -> Result<(), String> {
+    let connection = self.connection()?;
+    let affected = connection.execute(
+      "UPDATE characters SET name = ?2, sheet_json = ?3 WHERE id = ?1",
+      params![id, name, sheet_json],
+    ).map_err(|error| error.to_string())?;
+
+    if affected == 0 {
+      return Err(format!("character {} not found", id));
+    }
+    Ok(())
+  }
+
   pub fn load(&self) -> Result<Vec<SavedCharacter>, String> {
     let connection = self.connection()?;
     let mut statement = connection
@@ -96,6 +110,21 @@ mod tests {
     assert_eq!(characters[0].name, "Test Hero");
     database.delete(id).unwrap();
     assert!(database.load().unwrap().is_empty());
+    let _ = fs::remove_file(path);
+  }
+
+  #[test]
+  fn updates_sheet_json_without_creating_a_new_record() {
+    let (database, path) = setup();
+    let id = database.save("Test Hero", "{\"level\":5}").unwrap();
+    database.update(id, "Test Hero", "{\"level\":25}").unwrap();
+
+    let characters = database.load().unwrap();
+    assert_eq!(characters.len(), 1);
+    assert_eq!(characters[0].id, id);
+    assert_eq!(characters[0].sheet_json, "{\"level\":25}");
+
+    assert!(database.update(id + 1, "Ghost", "{}").is_err());
     let _ = fs::remove_file(path);
   }
 }

@@ -8,6 +8,8 @@ interface TitleScreenProps {
   locale: Locale;
   localeLabel: string;
   savedCharacterCount: number;
+  randomTargetLevel: number;
+  onRandomTargetLevelChange: (level: number) => void;
   onManualCreation: () => void;
   onRandomCreation: () => void;
   onGallery: () => void;
@@ -20,6 +22,8 @@ export const TitleScreen = ({
   locale,
   localeLabel,
   savedCharacterCount,
+  randomTargetLevel,
+  onRandomTargetLevelChange,
   onManualCreation,
   onRandomCreation,
   onGallery,
@@ -37,9 +41,49 @@ export const TitleScreen = ({
       <button onClick={onManualCreation} className="jrpg-button text-left p-4 rounded-none text-white hover:text-yellow-200 flex items-center justify-between">
         <span>⚔️ {strings.modeManual}</span><ChevronRight className="w-4 h-4 animate-bounce" />
       </button>
-      <button onClick={onRandomCreation} className="jrpg-button text-left p-4 rounded-none text-white hover:text-yellow-200 flex items-center justify-between">
-        <span>🎲 {strings.modeRandom}</span><ChevronRight className="w-4 h-4" />
-      </button>
+
+      {/* Random Creation with level selector */}
+      <div className="jrpg-button p-4 space-y-3 border-white/30">
+        <div
+          onClick={onRandomCreation}
+          className="flex items-center justify-between cursor-pointer hover:text-yellow-200 text-white"
+        >
+          <span>🎲 {strings.modeRandom}</span>
+          <ChevronRight className="w-4 h-4" />
+        </div>
+        <div className="border-t border-white/10 pt-3 space-y-2">
+          <div className="flex items-center justify-between text-[10px] font-mono">
+            <span className="text-gray-400 uppercase tracking-widest">
+              {locale === "pt" ? "Nível Inicial:" : "Starting Level:"}
+            </span>
+            <span className="text-yellow-300 font-bold px-2 py-0.5 bg-yellow-950/40 border border-yellow-500/40">
+              {locale === "pt" ? `Nv. ${randomTargetLevel}` : `Lv. ${randomTargetLevel}`}
+              {randomTargetLevel >= 10 && randomTargetLevel < 50 && (
+                <span className="text-[8px] text-cyan-400 ml-1">
+                  {locale === "pt" ? "(Maestria possível)" : "(Mastery possible)"}
+                </span>
+              )}
+            </span>
+          </div>
+          <input
+            type="range"
+            min={5}
+            max={50}
+            step={1}
+            value={randomTargetLevel}
+            onChange={(e) => onRandomTargetLevelChange(Number(e.target.value))}
+            className="w-full accent-yellow-400 cursor-pointer"
+            onClick={(e) => e.stopPropagation()}
+          />
+          <div className="flex justify-between text-[9px] text-gray-500 font-mono">
+            <span>5</span>
+            <span className="text-cyan-500/60">20</span>
+            <span className="text-purple-500/60">40</span>
+            <span>50</span>
+          </div>
+        </div>
+      </div>
+
       <button onClick={onGallery} className="jrpg-button text-left p-4 rounded-none text-white hover:text-yellow-200 flex items-center justify-between">
         <span>🏆 {localeLabel}</span>
         <span className="text-xs bg-yellow-500/20 text-yellow-300 px-2 py-0.5 rounded border border-yellow-400/30">{savedCharacterCount}</span>

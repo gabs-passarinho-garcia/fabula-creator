@@ -18,6 +18,7 @@ import type {
   SelectedClass,
   SelectedPower,
   SelectedSpell,
+  SelectedHeroicPower,
   AttributeStats,
   Weapon,
 } from "./types";
@@ -28,14 +29,30 @@ import {
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import { calculateDerivedStats } from "./domain/characterStats";
-import { generateRandomCharacter } from "./domain/characterCreation";
+import {
+  applyAttributeBoosts,
+  attributeBoostCountForLevel,
+  canOpenNewClass,
+  distributeStartingLevels,
+  generateRandomCharacter,
+  heroicPowerOptions,
+  isLevelAllocationValid,
+  levelUpCharacterStep,
+  MAX_CHARACTER_LEVEL,
+  MAX_CLASS_LEVEL,
+  maxStartingClasses,
+  MIN_STARTING_LEVEL,
+  stepUpAttribute,
+} from "./domain/characterCreation";
 import {
   adjustRank,
   areClassPowerBudgetsSpent,
   canDecrease,
   canIncrease,
+  purchaseRandomPowers,
   rankOf,
   remainingPurchases,
+  selectSpellsForRanks,
   spellGrantSlots,
   sumRanks,
   trimSpellsForPowerRanks,
@@ -65,6 +82,8 @@ export default function App() {
 
   // Active character sheet being viewed
   const [activeSheet, setActiveSheet] = useState<CharacterSheet | null>(null);
+  // Id of the persisted record backing `activeSheet` (null for unsaved sheets)
+  const [activeRecordId, setActiveRecordId] = useState<number | null>(null);
   const [successModal, setSuccessModal] = useState<SuccessModal>(null);
 
   // --- Manual Creation States ---
@@ -126,7 +145,29 @@ export default function App() {
   }, [loadSavedCharacters]);
 
   const saveCharacterToDb = async (sheet: CharacterSheet) => {
-    await repository.save(sheet);
+    if (activeRecordId !== null) {
+      // Editing a hero loaded from the gallery keeps a single record per hero.
+      await repository.update(activeRecordId, sheet);
+    } else {
+      setActiveRecordId(await repository.save(sheet));
+    }
+    await loadSavedCharacters();
+  };
+
+  /** Fills defaults for legacy sheets saved before the level system existed. */
+  const normalizeSheet = useCallback((sheet: CharacterSheet): CharacterSheet => {
+    const legacyLevel = sheet.level as number | undefined;
+    return {
+      ...sheet,
+      level: legacyLevel ?? MIN_STARTING_LEVEL,
+      heroicPowers: sheet.heroicPowers ?? [],
+    };
+  }, []);
+
+  /** Persists a leveled sheet when it came from the gallery, otherwise keeps it in memory. */
+  const persistEvolvedSheet = async (sheet: CharacterSheet) => {
+    if (activeRecordId === null) return;
+    await repository.update(activeRecordId, sheet);
     await loadSavedCharacters();
   };
 
@@ -141,18 +182,75 @@ export default function App() {
   const playCancel = () => sounds.playCancel();
   const playLevelUp = () => sounds.playLevelUp();
 
+  // Random level state
+  const [randomTargetLevel, setRandomTargetLevel] = useState<number>(5);
+
+  // Manual creation high level state
+  const [manualTargetLevel, setManualTargetLevel] = useState<number>(MIN_STARTING_LEVEL);
+  const [manualHeroicPowers, setManualHeroicPowers] = useState<SelectedHeroicPower[]>([]);
+  const [manualAttributeBoosts, setManualAttributeBoosts] = useState<string[]>([]);
+
+  // Level Up Modal state (empty class/power means "pick randomly")
+  const [showLevelUpModal, setShowLevelUpModal] = useState<boolean>(false);
+  const [levelUpTargetClass, setLevelUpTargetClass] = useState<string>("");
+  const [levelUpTargetPower, setLevelUpTargetPower] = useState<string>("");
+
+  /** Publishes an evolved sheet, persists it when it belongs to the gallery and celebrates. */
+  const applyLevelUpResult = (evolved: CharacterSheet) => {
+    setActiveSheet(evolved);
+    setShowLevelUpModal(false);
+    setLevelUpTargetClass("");
+    setLevelUpTargetPower("");
+    playLevelUp();
+    confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
+    void persistEvolvedSheet(evolved);
+  };
+
   // Mode selections
-  const handleRandomCreation = () => {
+  const handleRandomCreation = (targetLevel: number = 5) => {
     playConfirm();
-    const sheet = generateRandomCharacter(gameData, strings);
+    const sheet = generateRandomCharacter(
+      gameData,
+      strings,
+      targetLevel,
+    );
 
     setActiveSheet(sheet);
+    setActiveRecordId(null);
     setCurrentScreen("sheet");
     setTimeout(() => {
       playLevelUp();
       confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
     }, 150);
   };
+
+  /** Class names the next level may be invested in (active classes plus newly openable ones). */
+  const levelUpClassOptions = useMemo(() => {
+    if (!activeSheet) return [] as string[];
+    const active = activeSheet.classes
+      .filter((entry) => entry.level < MAX_CLASS_LEVEL)
+      .map((entry) => entry.rpgClass.name);
+    if (!canOpenNewClass(activeSheet.classes)) return active;
+    const untouched = gameData.classes
+      .filter((rpgClass) => !activeSheet.classes.some((entry) => entry.rpgClass.name === rpgClass.name))
+      .map((rpgClass) => rpgClass.name);
+    return [...active, ...untouched];
+  }, [activeSheet, gameData.classes]);
+
+  /** Power names still purchasable for the class chosen in the Level Up modal. */
+  const levelUpPowerOptions = useMemo(() => {
+    if (!activeSheet || levelUpTargetClass === "") return [] as string[];
+    const owned = activeSheet.classes.find((entry) => entry.rpgClass.name === levelUpTargetClass);
+    const catalog = owned?.rpgClass ?? gameData.classes.find((rpgClass) => rpgClass.name === levelUpTargetClass);
+    if (!catalog) return [] as string[];
+    const nextLevel = (owned?.level ?? 0) + 1;
+    const remaining = remainingPurchases(nextLevel, activeSheet.powers, levelUpTargetClass);
+    return catalog.powers
+      .filter((power) =>
+        canIncrease(power, rankOf(activeSheet.powers, levelUpTargetClass, power.name), remaining),
+      )
+      .map((power) => power.name);
+  }, [activeSheet, levelUpTargetClass, gameData.classes]);
 
   // Helper to parse dice pools
   const parseDiceStr = (diceString: string): number[] =>
@@ -186,10 +284,14 @@ export default function App() {
     setClassLevels({});
     setSelectedPowers([]);
     setSelectedSpells([]);
+    setManualTargetLevel(MIN_STARTING_LEVEL);
+    setManualHeroicPowers([]);
+    setManualAttributeBoosts([]);
 
     setSelectedWeapon(null);
     setSelectedArmor(null);
     setSelectedShield(null);
+    setActiveRecordId(null);
 
     setCurrentScreen("manual");
   };
@@ -244,6 +346,7 @@ export default function App() {
       setClassLevels(updatedLevels);
       setSelectedPowers([]);
       setSelectedSpells([]);
+      setManualHeroicPowers([]);
     } else {
       if (selectedClasses.length >= classCount) {
         playCancel();
@@ -264,11 +367,68 @@ export default function App() {
     // previous choices and makes the user review the available slots again.
     setSelectedPowers([]);
     setSelectedSpells([]);
+    // Mastery (level 10) also changes which Heroic Powers are owed.
+    setManualHeroicPowers([]);
   };
 
-  // Check if manually assigned levels sum up to 5
-  const sumLevels = () => {
-    return Object.values(classLevels).reduce((acc, l) => acc + l, 0);
+  // Total levels allocated so far in the manual wizard
+  const sumLevels = () => Object.values(classLevels).reduce((acc, l) => acc + l, 0);
+
+  // --- Manual high level allocation ---
+  const manualClassEntries: SelectedClass[] = selectedClasses.map((rc) => ({
+    rpgClass: rc,
+    level: classLevels[rc.name] || 1,
+  }));
+  const manualMaxClasses = maxStartingClasses(manualTargetLevel, gameData.classes.length);
+  const manualMasteredEntries = manualClassEntries.filter((entry) => entry.level >= MAX_CLASS_LEVEL);
+  const manualActiveNonMastered = manualClassEntries.filter((entry) => entry.level < MAX_CLASS_LEVEL).length;
+  const manualAllocationValid = isLevelAllocationValid(
+    manualClassEntries.map((entry) => entry.level),
+    manualTargetLevel,
+  );
+  const manualBoostCount = attributeBoostCountForLevel(manualTargetLevel);
+  const manualBoostedAttributes = applyAttributeBoosts(assignedStats, manualAttributeBoosts);
+  const manualHeroicPowersComplete = manualMasteredEntries.every((entry) =>
+    manualHeroicPowers.some((choice) => choice.source === entry.rpgClass.name),
+  );
+  const manualBoostsComplete = manualAttributeBoosts.length === manualBoostCount;
+
+  /** Changes the manual starting level, trimming class picks that no longer fit. */
+  const handleManualTargetLevelChange = (level: number) => {
+    const bounded = Math.max(MIN_STARTING_LEVEL, Math.min(MAX_CHARACTER_LEVEL, level));
+    setManualTargetLevel(bounded);
+    setManualHeroicPowers([]);
+    setManualAttributeBoosts([]);
+
+    const allowed = maxStartingClasses(bounded, gameData.classes.length);
+    if (classCount > allowed) {
+      const kept = selectedClasses.slice(0, allowed);
+      const keptLevels: Record<string, number> = {};
+      kept.forEach((rc) => {
+        keptLevels[rc.name] = Math.min(classLevels[rc.name] ?? 1, MAX_CLASS_LEVEL);
+      });
+      setClassCount(allowed);
+      setSelectedClasses(kept);
+      setClassLevels(keptLevels);
+      setSelectedPowers([]);
+      setSelectedSpells([]);
+    }
+  };
+
+  /** Randomly reallocates the whole level budget across the chosen classes. */
+  const handleAutoDistributeLevels = () => {
+    playConfirm();
+    if (selectedClasses.length === 0) return;
+    const levels = distributeStartingLevels(selectedClasses.length, manualTargetLevel);
+    const nextLevels: Record<string, number> = {};
+    selectedClasses.forEach((rc, index) => {
+      nextLevels[rc.name] = levels[index] ?? 1;
+    });
+    setClassLevels(nextLevels);
+    setSelectedPowers([]);
+    setSelectedSpells([]);
+    setManualHeroicPowers([]);
+    setManualAttributeBoosts([]);
   };
 
   const handleAdjustPowerRank = (className: string, power: ClassPower, delta: number, classLevel: number) => {
@@ -286,6 +446,64 @@ export default function App() {
     setSelectedSpells([...filteredSpells, { spell, className, grantedByPower, grantIndex }]);
   };
 
+  /** Picks the Heroic Power granted by a mastered class in the manual wizard. */
+  const handleSelectHeroicPower = (sourceClass: string, powerName: string) => {
+    playConfirm();
+    const rpgClass = selectedClasses.find((rc) => rc.name === sourceClass);
+    if (!rpgClass) return;
+    const option = heroicPowerOptions(rpgClass, gameData.universalHeroicPowers ?? []).find(
+      (entry) => entry.power.name === powerName,
+    );
+    if (!option) return;
+    setManualHeroicPowers([
+      ...manualHeroicPowers.filter((choice) => choice.source !== sourceClass),
+      option,
+    ]);
+  };
+
+  /** Adds or removes one level 20/40 attribute step-up, respecting the d12 ceiling. */
+  const handleToggleAttributeBoost = (key: string) => {
+    playClick();
+    const steps = manualAttributeBoosts.filter((entry) => entry === key).length;
+    const baseValue = assignedStats[key] ?? 8;
+    const currentValue = Array.from({ length: steps }).reduce<number>(
+      (value) => stepUpAttribute(value),
+      baseValue,
+    );
+    const existingIndex = manualAttributeBoosts.lastIndexOf(key);
+
+    if (currentValue >= 12 || manualAttributeBoosts.length >= manualBoostCount) {
+      if (existingIndex >= 0) {
+        setManualAttributeBoosts(manualAttributeBoosts.filter((_, index) => index !== existingIndex));
+      }
+      return;
+    }
+    setManualAttributeBoosts([...manualAttributeBoosts, key]);
+  };
+
+  /** Spends every class level on randomly picked class powers. */
+  const handleRandomizePowers = () => {
+    playConfirm();
+    const entries: SelectedClass[] = selectedClasses.map((rc) => ({
+      rpgClass: rc,
+      level: classLevels[rc.name] || 1,
+    }));
+    const powers = purchaseRandomPowers(entries, { next: () => Math.random() });
+    setSelectedPowers(powers);
+    setSelectedSpells(trimSpellsForPowerRanks(selectedSpells, powers));
+  };
+
+  /** Fills every pending spell slot with a random spell from the owning class. */
+  const handleRandomizeSpells = () => {
+    playConfirm();
+    const spells = selectSpellsForRanks(
+      selectedPowers,
+      selectedClasses,
+      (available) => available[Math.floor(Math.random() * available.length)] ?? available[0]!,
+    );
+    setSelectedSpells(spells);
+  };
+
   const handleFinishManualCharacter = () => {
     playConfirm();
 
@@ -294,6 +512,11 @@ export default function App() {
       rpgClass: rc,
       level: classLevels[rc.name] || 1,
     }));
+
+    // Total level equals the sum of the levels invested in each class
+    const totalLevel = finalClasses.reduce((total, entry) => total + entry.level, 0);
+    // Level 20/40 step-ups picked in the power step are applied to the final dice
+    const finalAttributes = applyAttributeBoosts(assignedStats, manualAttributeBoosts);
 
     // Clean up powers
     const finalPowers = [...selectedPowers];
@@ -310,10 +533,10 @@ export default function App() {
 
     const purchaseResult = buildEquipmentPurchaseResult(equipSelection, gameData.startingBudget);
     const derivedStats = calculateDerivedStats(
-      assignedStats,
+      finalAttributes,
       selectedClasses,
       purchaseResult.equipment,
-      5,
+      totalLevel,
       strings,
     );
 
@@ -321,10 +544,12 @@ export default function App() {
       name: name || strings.defaults.randomHeroName,
       identity: `${adjective} ${concept} ${detail}`,
       theme,
+      level: totalLevel,
       classes: finalClasses,
       powers: finalPowers,
       spells: finalSpells,
-      attributes: assignedStats,
+      heroicPowers: manualHeroicPowers,
+      attributes: finalAttributes,
       equipment: purchaseResult.equipment,
       derivedStats,
       equipmentSpent: purchaseResult.equipmentSpent,
@@ -333,6 +558,7 @@ export default function App() {
     };
 
     setActiveSheet(sheet);
+    setActiveRecordId(null);
     setCurrentScreen("sheet");
     setTimeout(() => {
       playLevelUp();
@@ -369,7 +595,8 @@ export default function App() {
         const sheet = parseCharacterSheet(result);
         if (sheet.name && sheet.identity) {
           playLevelUp();
-          setActiveSheet(sheet);
+          setActiveSheet(normalizeSheet(sheet));
+          setActiveRecordId(null);
           setCurrentScreen("sheet");
           confetti({ particleCount: 50, spread: 40 });
           setSuccessModal({
@@ -437,16 +664,20 @@ export default function App() {
       <main className="flex-1 flex flex-col items-center justify-center p-4 relative z-10 max-w-5xl w-full mx-auto my-4">
         {/* ==================== TITLE SCREEN ==================== */}
         {currentScreen === "title" && (
-          <TitleScreen
-            strings={strings}
-            locale={locale}
-            localeLabel={locale === "pt" ? "Galeria de Heróis" : "Hero Gallery"}
-            savedCharacterCount={savedCharacters.length}
-            onManualCreation={startManualCreation}
-            onRandomCreation={handleRandomCreation}
-            onGallery={() => { playConfirm(); setCurrentScreen("gallery"); }}
-            onImport={handleImportJson}
-          />
+          <>
+            <TitleScreen
+              strings={strings}
+              locale={locale}
+              localeLabel={locale === "pt" ? "Galeria de Heróis" : "Hero Gallery"}
+              savedCharacterCount={savedCharacters.length}
+              randomTargetLevel={randomTargetLevel}
+              onRandomTargetLevelChange={setRandomTargetLevel}
+              onManualCreation={startManualCreation}
+              onRandomCreation={() => handleRandomCreation(randomTargetLevel)}
+              onGallery={() => { playConfirm(); setCurrentScreen("gallery"); }}
+              onImport={handleImportJson}
+            />
+          </>
         )}
 
         {/* ==================== HERO GALLERY ==================== */}
@@ -456,7 +687,20 @@ export default function App() {
             records={savedCharacters}
             onBack={() => { playCancel(); setCurrentScreen("title"); }}
             onCreateFirst={startManualCreation}
-            onOpen={(sheet) => { playConfirm(); setActiveSheet(sheet); setCurrentScreen("sheet"); }}
+            onOpen={(sheet, recordId) => {
+              playConfirm();
+              setActiveSheet(normalizeSheet(sheet));
+              setActiveRecordId(recordId);
+              setCurrentScreen("sheet");
+            }}
+            onLevelUp={(sheet, recordId) => {
+              playConfirm();
+              setActiveSheet(normalizeSheet(sheet));
+              setActiveRecordId(recordId);
+              setLevelUpTargetClass("");
+              setLevelUpTargetPower("");
+              setShowLevelUpModal(true);
+            }}
             onExport={handleExportJson}
             onDelete={(id) => {
               playCancel();
@@ -510,8 +754,11 @@ export default function App() {
                     disabled={
                       (manualStep === 1 && !name) ||
                       (manualStep === 2 && statDicePool.length > 0) ||
-                      (manualStep === 3 && (selectedClasses.length < 2 || sumLevels() !== 5)) ||
-                      (manualStep === 4 && !areClassPowerBudgetsSpent(selectedClasses.map((rc) => ({ rpgClass: rc, level: classLevels[rc.name] || 1 })), selectedPowers)) ||
+                      (manualStep === 3 && !manualAllocationValid) ||
+                      (manualStep === 4 &&
+                        (!areClassPowerBudgetsSpent(manualClassEntries, selectedPowers) ||
+                          !manualHeroicPowersComplete ||
+                          !manualBoostsComplete)) ||
                       (manualStep === 5 && spellGrantSlots(selectedPowers).length > selectedSpells.length)
                     }
                     className="jrpg-button px-3 py-1.5 text-[10px] disabled:opacity-50"
@@ -729,23 +976,70 @@ export default function App() {
             {/* STEP 3: Class Selection & Level Distribution */}
             {manualStep === 3 && (
               <div className="space-y-6">
+                {/* Starting level budget */}
+                <div className="space-y-3 border-b border-white/10 pb-4">
+                  <div className="flex items-center justify-between text-xs font-mono">
+                    <span className="pixel-font text-yellow-300">
+                      {locale === "pt" ? "Nível inicial do herói" : "Hero starting level"}
+                    </span>
+                    <span className="text-yellow-300 font-bold px-2 py-0.5 bg-yellow-950/40 border border-yellow-500/40">
+                      {locale === "pt" ? `Nv. ${manualTargetLevel}` : `Lv. ${manualTargetLevel}`}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min={MIN_STARTING_LEVEL}
+                    max={MAX_CHARACTER_LEVEL}
+                    step={1}
+                    value={manualTargetLevel}
+                    onChange={(e) => handleManualTargetLevelChange(Number(e.target.value))}
+                    className="w-full accent-yellow-400 cursor-pointer"
+                  />
+                  <div className="flex justify-between text-[9px] text-gray-500 font-mono">
+                    <span>{MIN_STARTING_LEVEL}</span>
+                    <span className="text-cyan-500/70">20 · +1 atributo</span>
+                    <span className="text-purple-500/70">40 · +1 atributo</span>
+                    <span>{MAX_CHARACTER_LEVEL}</span>
+                  </div>
+                  <p className="text-[10px] font-mono text-white/60 leading-relaxed">
+                    {locale === "pt"
+                      ? `Orçamento: ${manualTargetLevel} níveis · até ${MAX_CLASS_LEVEL} por classe · máx. 3 classes ativas sem maestria (${manualActiveNonMastered}/3)`
+                      : `Budget: ${manualTargetLevel} levels · up to ${MAX_CLASS_LEVEL} per class · max 3 active non-mastered classes (${manualActiveNonMastered}/3)`}
+                  </p>
+                  <p className="text-[10px] font-mono text-yellow-300/80 leading-relaxed">
+                    {locale === "pt"
+                      ? `Maestrias neste build: ${manualMasteredEntries.length} · Poderes Heróicos exigidos: ${manualMasteredEntries.length} · Aumentos de atributo: ${manualBoostCount}`
+                      : `Masteries in this build: ${manualMasteredEntries.length} · Required Heroic Powers: ${manualMasteredEntries.length} · Attribute boosts: ${manualBoostCount}`}
+                  </p>
+                </div>
+
                 {/* Number of classes to select */}
-                <div className="flex items-center gap-4 border-b border-white/10 pb-4">
+                <div className="flex flex-wrap items-center gap-4 border-b border-white/10 pb-4">
                   <span className="text-xs pixel-font text-yellow-300">
                     {locale === "pt" ? "Quantas classes deseja forjar?" : "How many classes to select?"}
                   </span>
 
                   <div className="flex gap-2">
-                    {[2, 3].map((num) => (
+                    {Array.from({ length: manualMaxClasses - 1 }, (_, index) => index + 2).map((num) => (
                       <button
                         key={num}
                         onClick={() => {
                           playClick();
                           setClassCount(num);
-                          setSelectedClasses([]);
-                          setClassLevels({});
-                          setSelectedPowers([]);
-                          setSelectedSpells([]);
+                          // Growing the roster keeps the work already done; shrinking
+                          // drops the classes that no longer fit.
+                          if (num < selectedClasses.length) {
+                            const kept = selectedClasses.slice(0, num);
+                            const keptLevels: Record<string, number> = {};
+                            kept.forEach((rc) => {
+                              keptLevels[rc.name] = Math.min(classLevels[rc.name] ?? 1, MAX_CLASS_LEVEL);
+                            });
+                            setSelectedClasses(kept);
+                            setClassLevels(keptLevels);
+                            setSelectedPowers([]);
+                            setSelectedSpells([]);
+                            setManualHeroicPowers([]);
+                          }
                         }}
                         className={`w-8 h-8 flex items-center justify-center border-2 text-xs font-mono ${
                           classCount === num
@@ -757,6 +1051,14 @@ export default function App() {
                       </button>
                     ))}
                   </div>
+
+                  <button
+                    onClick={handleAutoDistributeLevels}
+                    disabled={selectedClasses.length === 0}
+                    className="jrpg-button px-3 py-1.5 text-[10px] disabled:opacity-40"
+                  >
+                    🎲 {locale === "pt" ? "Distribuir níveis" : "Distribute levels"}
+                  </button>
                 </div>
 
                 {/* Selected Classes Summary & Level Allocation */}
@@ -765,8 +1067,8 @@ export default function App() {
                     <p className="text-xs pixel-font text-blue-300">
                       {locale === "pt" ? "Classes Atuais & Níveis" : "Active Classes & Levels"}
                     </p>
-                    <span className="text-xs font-mono text-cyan-400">
-                      Level Sum: {sumLevels()} / 5
+                    <span className={`text-xs font-mono ${sumLevels() === manualTargetLevel ? "text-green-400" : "text-cyan-400"}`}>
+                      Level Sum: {sumLevels()} / {manualTargetLevel}
                     </span>
                   </div>
 
@@ -778,9 +1080,17 @@ export default function App() {
                     <div className="space-y-3">
                       {selectedClasses.map((rc) => {
                         const lvl = classLevels[rc.name] || 1;
+                        const isMastered = lvl >= MAX_CLASS_LEVEL;
                         return (
                           <div key={rc.name} className="flex items-center justify-between bg-black/30 p-2 border border-white/10 font-mono">
-                            <span className="text-xs font-bold text-yellow-300">{rc.name}</span>
+                            <span className="text-xs font-bold text-yellow-300 flex items-center gap-2">
+                              {rc.name}
+                              {isMastered && (
+                                <span className="text-[9px] bg-yellow-500/20 text-yellow-300 px-1.5 py-0.5 border border-yellow-400/40">
+                                  {locale === "pt" ? "MESTRE" : "MASTER"}
+                                </span>
+                              )}
+                            </span>
 
                             <div className="flex items-center gap-2">
                               <button
@@ -790,9 +1100,11 @@ export default function App() {
                               >
                                 -
                               </button>
-                              <span className="text-xs px-2">{lvl}</span>
+                              <span className="text-xs px-2">
+                                {lvl}/{MAX_CLASS_LEVEL}
+                              </span>
                               <button
-                                disabled={sumLevels() >= 5}
+                                disabled={lvl >= MAX_CLASS_LEVEL || sumLevels() >= manualTargetLevel}
                                 onClick={() => updateClassLevel(rc.name, lvl + 1)}
                                 className="w-6 h-6 flex items-center justify-center border border-white/30 text-xs hover:border-white disabled:opacity-30"
                               >
@@ -802,6 +1114,62 @@ export default function App() {
                           </div>
                         );
                       })}
+                    </div>
+                  )}
+
+                  {selectedClasses.length > 0 && (
+                    <div className="space-y-1 text-[10px] font-mono">
+                      {sumLevels() < manualTargetLevel && (
+                        <p className="text-cyan-300">
+                          {locale === "pt"
+                            ? `Faltam ${manualTargetLevel - sumLevels()} níveis para distribuir (use + ou o botão de distribuir aleatoriamente).`
+                            : `${manualTargetLevel - sumLevels()} levels still to distribute (use + or the random distribute button).`}
+                        </p>
+                      )}
+                      {sumLevels() < manualTargetLevel &&
+                        manualClassEntries.length > 0 &&
+                        manualClassEntries.every((entry) => entry.level >= MAX_CLASS_LEVEL) && (
+                          <p className="text-yellow-300">
+                            {locale === "pt"
+                              ? `Todas as classes escolhidas já estão dominadas (nível ${MAX_CLASS_LEVEL}). Aumente a quantidade de classes e escolha novas no catálogo abaixo para investir os ${manualTargetLevel - sumLevels()} níveis restantes.`
+                              : `Every chosen class is already mastered (level ${MAX_CLASS_LEVEL}). Increase the class count and pick new ones in the catalog below to invest the remaining ${manualTargetLevel - sumLevels()} levels.`}
+                          </p>
+                        )}
+                      {manualMasteredEntries.length > 0 && selectedClasses.length < manualMaxClasses && (
+                        <p className="text-green-300">
+                          {locale === "pt"
+                            ? `Classes dominadas não ocupam o limite de 3 ativas — você pode forjar até ${manualMaxClasses} classes neste nível.`
+                            : `Mastered classes do not occupy the 3-active limit — you may forge up to ${manualMaxClasses} classes at this level.`}
+                        </p>
+                      )}
+                      {sumLevels() > manualTargetLevel && (
+                        <p className="text-red-400">
+                          {locale === "pt"
+                            ? `Você excedeu o orçamento em ${sumLevels() - manualTargetLevel} níveis.`
+                            : `You exceeded the budget by ${sumLevels() - manualTargetLevel} levels.`}
+                        </p>
+                      )}
+                      {selectedClasses.length < 2 && (
+                        <p className="text-red-400">
+                          {locale === "pt"
+                            ? "Escolha pelo menos 2 classes."
+                            : "Choose at least 2 classes."}
+                        </p>
+                      )}
+                      {manualActiveNonMastered > 3 && (
+                        <p className="text-red-400">
+                          {locale === "pt"
+                            ? `Classes ativas sem maestria: ${manualActiveNonMastered}/3. Leve uma classe ao nível ${MAX_CLASS_LEVEL} para dominá-la e liberar espaço.`
+                            : `Active non-mastered classes: ${manualActiveNonMastered}/3. Take one class to level ${MAX_CLASS_LEVEL} to master it and free a slot.`}
+                        </p>
+                      )}
+                      {manualTargetLevel > selectedClasses.length * MAX_CLASS_LEVEL && (
+                        <p className="text-yellow-300">
+                          {locale === "pt"
+                            ? `Com ${selectedClasses.length} classe(s) o máximo alcançável é ${selectedClasses.length * MAX_CLASS_LEVEL} níveis. Adicione mais classes para chegar ao nível ${manualTargetLevel}.`
+                            : `With ${selectedClasses.length} class(es) the maximum reachable is ${selectedClasses.length * MAX_CLASS_LEVEL} levels. Add more classes to reach level ${manualTargetLevel}.`}
+                        </p>
+                      )}
                     </div>
                   )}
                 </div>
@@ -843,9 +1211,23 @@ export default function App() {
             {/* STEP 4: Choose Powers per level */}
             {manualStep === 4 && (
               <div className="space-y-6">
-                <p className="text-xs font-mono text-blue-300">
-                  {strings.prompts.choosePowersHint}
-                </p>
+                <div className="flex flex-wrap justify-between items-center gap-2">
+                  <p className="text-xs font-mono text-blue-300">
+                    {strings.prompts.choosePowersHint}
+                  </p>
+                  <span className="text-[10px] font-mono text-cyan-300">
+                    {locale === "pt"
+                      ? `Ranks alocados: ${sumRanks(selectedPowers)} / ${sumLevels()}`
+                      : `Allocated ranks: ${sumRanks(selectedPowers)} / ${sumLevels()}`}
+                  </span>
+                  <button
+                    onClick={handleRandomizePowers}
+                    disabled={selectedClasses.length === 0}
+                    className="jrpg-button px-3 py-1.5 text-[10px] disabled:opacity-40"
+                  >
+                    🎲 {locale === "pt" ? "Preencher aleatoriamente" : "Random fill"}
+                  </button>
+                </div>
 
                 <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                   {selectedClasses.map((rc) => {
@@ -912,17 +1294,156 @@ export default function App() {
                     );
                   })}
                 </div>
+
+                {/* Mastery: one Heroic Power per class taken to level 10 */}
+                {manualMasteredEntries.length > 0 && (
+                  <div className="space-y-3 border-t border-white/10 pt-4">
+                    <div className="flex justify-between items-center">
+                      <p className="text-xs pixel-font text-yellow-300">
+                        👑 {locale === "pt" ? "PODERES HERÓICOS (MAESTRIA)" : "HEROIC POWERS (MASTERY)"}
+                      </p>
+                      <span className={`text-[10px] font-mono ${manualHeroicPowersComplete ? "text-green-400" : "text-cyan-300"}`}>
+                        {manualHeroicPowers.length}/{manualMasteredEntries.length}
+                      </span>
+                    </div>
+                    <p className="text-[10px] font-mono text-white/60">
+                      {locale === "pt"
+                        ? `Cada classe dominada (nível ${MAX_CLASS_LEVEL}) concede 1 Poder Heroico, de classe ou universal.`
+                        : `Every mastered class (level ${MAX_CLASS_LEVEL}) grants 1 Heroic Power, class-specific or universal.`}
+                    </p>
+
+                    {manualMasteredEntries.map((entry) => {
+                      const chosen = manualHeroicPowers.find(
+                        (choice) => choice.source === entry.rpgClass.name,
+                      );
+                      const options = heroicPowerOptions(
+                        entry.rpgClass,
+                        gameData.universalHeroicPowers ?? [],
+                      ).filter(
+                        (option) =>
+                          !manualHeroicPowers.some(
+                            (choice) =>
+                              choice.power.name === option.power.name &&
+                              choice.source !== entry.rpgClass.name,
+                          ),
+                      );
+
+                      return (
+                        <div
+                          key={entry.rpgClass.name}
+                          className="space-y-2 bg-black/20 p-3 border border-yellow-500/30"
+                        >
+                          <div className="flex justify-between items-center">
+                            <span className="text-[11px] font-bold font-mono text-yellow-200">
+                              {entry.rpgClass.name} · Lvl {entry.level}
+                            </span>
+                            <button
+                              onClick={() => {
+                                const available = options.filter(
+                                  (option) => option.power.name !== chosen?.power.name,
+                                );
+                                const pool = available.length > 0 ? available : options;
+                                const picked = pool[Math.floor(Math.random() * pool.length)];
+                                if (picked) {
+                                  handleSelectHeroicPower(entry.rpgClass.name, picked.power.name);
+                                }
+                              }}
+                              className="jrpg-button px-2 py-1 text-[9px]"
+                            >
+                              🎲 {locale === "pt" ? "Aleatório" : "Random"}
+                            </button>
+                          </div>
+
+                          <select
+                            value={chosen?.power.name ?? ""}
+                            onChange={(e) => handleSelectHeroicPower(entry.rpgClass.name, e.target.value)}
+                            className="jrpg-select w-full border-2 border-white p-2 text-xs outline-none"
+                          >
+                            <option value="">
+                              {locale === "pt" ? "-- escolha um poder heroico --" : "-- choose a heroic power --"}
+                            </option>
+                            {options.map((option) => (
+                              <option key={`${option.source}-${option.power.name}`} value={option.power.name}>
+                                [{option.source}] {option.power.name}
+                              </option>
+                            ))}
+                          </select>
+
+                          {chosen && (
+                            <p className="text-[10px] font-mono text-white/60 leading-relaxed">
+                              {chosen.power.mechanics || chosen.power.description}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Level 20 and 40 attribute step-ups */}
+                {manualBoostCount > 0 && (
+                  <div className="space-y-3 border-t border-white/10 pt-4">
+                    <div className="flex justify-between items-center">
+                      <p className="text-xs pixel-font text-cyan-300">
+                        📈 {locale === "pt" ? "AUMENTOS DE ATRIBUTO (NV 20/40)" : "ATTRIBUTE BOOSTS (LV 20/40)"}
+                      </p>
+                      <span className={`text-[10px] font-mono ${manualBoostsComplete ? "text-green-400" : "text-cyan-300"}`}>
+                        {manualAttributeBoosts.length}/{manualBoostCount}
+                      </span>
+                    </div>
+                    <p className="text-[10px] font-mono text-white/60">
+                      {locale === "pt"
+                        ? "Cada aumento sobe um dado em um passo (d6→d8→d10→d12). Clique para aplicar ou desfazer."
+                        : "Each boost raises one die by a step (d6→d8→d10→d12). Click to apply or undo."}
+                    </p>
+
+                    <div className="grid grid-cols-2 gap-2 font-mono">
+                      {strings.attributeOrder.map((key) => {
+                        const base = assignedStats[key] ?? 8;
+                        const current = manualBoostedAttributes[key] ?? base;
+                        const steps = manualAttributeBoosts.filter((entry) => entry === key).length;
+                        return (
+                          <button
+                            key={key}
+                            onClick={() => handleToggleAttributeBoost(key)}
+                            className={`p-2 border text-left text-[11px] flex justify-between items-center transition ${
+                              steps > 0
+                                ? "border-cyan-400 bg-cyan-400/10 text-cyan-200"
+                                : "border-white/10 hover:border-white/50"
+                            }`}
+                          >
+                            <span className="font-bold">{strings.attributeLabels[key] ?? key}</span>
+                            <span>
+                              d{base}
+                              {steps > 0 ? ` → d${current}` : ""}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
             {/* STEP 5: Spells Selection */}
             {manualStep === 5 && (
               <div className="space-y-6">
-                <p className="text-xs font-mono text-blue-300">
-                  {locale === "pt"
-                    ? "Para cada nível de um poder de conjuração, escolha uma magia correspondente"
-                    : "For each rank of a spell-granting power, select a corresponding spell"}
-                </p>
+                <div className="flex flex-wrap justify-between items-center gap-2">
+                  <p className="text-xs font-mono text-blue-300">
+                    {locale === "pt"
+                      ? "Para cada nível de um poder de conjuração, escolha uma magia correspondente"
+                      : "For each rank of a spell-granting power, select a corresponding spell"}
+                  </p>
+                  {spellGrantSlots(selectedPowers).length > 0 && (
+                    <button
+                      onClick={handleRandomizeSpells}
+                      className="jrpg-button px-3 py-1.5 text-[10px]"
+                    >
+                      🎲 {locale === "pt" ? "Preencher aleatoriamente" : "Random fill"}
+                    </button>
+                  )}
+                </div>
 
                 {(() => {
                   const slots = spellGrantSlots(selectedPowers);
@@ -1156,8 +1677,205 @@ export default function App() {
               playCancel();
               setCurrentScreen("title");
             }}
+            onLevelUp={() => setShowLevelUpModal(true)}
             formatWeaponAttack={formatWeaponAttackString}
           />
+        )}
+
+        {/* ==================== LEVEL UP MODAL ==================== */}
+        {showLevelUpModal && activeSheet && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 animate-[fadeIn_0.2s_ease-out]">
+            <div className="jrpg-panel max-w-md w-full p-6 space-y-5 border-2 border-yellow-400 shadow-2xl">
+              <div className="flex justify-between items-center border-b border-white/20 pb-3">
+                <h3 className="pixel-font text-sm text-yellow-300">⭐ {locale === "pt" ? "SUBIR NÍVEL" : "LEVEL UP"}</h3>
+                <button onClick={() => setShowLevelUpModal(false)} className="text-gray-400 hover:text-white p-1">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <p className="font-mono text-xs text-gray-300">
+                {locale === "pt"
+                  ? `Nível atual: ${activeSheet.level}. Escolha como evoluir seu herói.`
+                  : `Current level: ${activeSheet.level}. Choose how to evolve your hero.`}
+              </p>
+
+              {/* Optional manual progression: pick the class and the power to learn */}
+              <div className="space-y-3 font-mono border border-white/10 p-3 bg-black/20">
+                <p className="text-[10px] pixel-font text-yellow-300">
+                  {locale === "pt" ? "EVOLUÇÃO MANUAL (OPCIONAL)" : "MANUAL PROGRESSION (OPTIONAL)"}
+                </p>
+
+                <div className="space-y-1">
+                  <span className="text-[10px] text-white/60">
+                    {locale === "pt" ? "Classe a evoluir" : "Class to advance"}
+                  </span>
+                  <select
+                    value={levelUpTargetClass}
+                    onChange={(e) => {
+                      playClick();
+                      setLevelUpTargetClass(e.target.value);
+                      setLevelUpTargetPower("");
+                    }}
+                    className="jrpg-select w-full border-2 border-white p-2 text-xs outline-none"
+                  >
+                    <option value="">{locale === "pt" ? "Automático (aleatório)" : "Automatic (random)"}</option>
+                    {levelUpClassOptions.map((className) => (
+                      <option key={className} value={className}>
+                        {className}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {levelUpTargetClass !== "" && (
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-white/60">
+                      {locale === "pt" ? "Poder a aprender (opcional)" : "Power to learn (optional)"}
+                    </span>
+                    <select
+                      value={levelUpTargetPower}
+                      onChange={(e) => {
+                        playClick();
+                        setLevelUpTargetPower(e.target.value);
+                      }}
+                      className="jrpg-select w-full border-2 border-white p-2 text-xs outline-none"
+                    >
+                      <option value="">{locale === "pt" ? "Automático (aleatório)" : "Automatic (random)"}</option>
+                      {levelUpPowerOptions.map((powerName) => (
+                        <option key={powerName} value={powerName}>
+                          {powerName}
+                        </option>
+                      ))}
+                    </select>
+                    {levelUpPowerOptions.length === 0 && (
+                      <p className="text-[10px] text-white/50">
+                        {locale === "pt"
+                          ? "Todos os poderes desta classe já estão no rank máximo."
+                          : "Every power of this class is already at max rank."}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-3 font-mono">
+                <button
+                  onClick={() => {
+                    try {
+                      const evolved = levelUpCharacterStep(
+                        activeSheet,
+                        gameData.classes,
+                        strings,
+                        gameData.universalHeroicPowers ?? [],
+                        levelUpTargetClass === "" ? undefined : levelUpTargetClass,
+                        levelUpTargetPower === "" ? undefined : levelUpTargetPower,
+                      );
+                      applyLevelUpResult(evolved);
+                    } catch (e) {
+                      alert(locale === "pt"
+                        ? "Não foi possível subir de nível: " + String(e)
+                        : "Could not level up: " + String(e));
+                    }
+                  }}
+                  className="w-full jrpg-button p-3 text-left flex items-start gap-3 hover:border-yellow-300 group"
+                >
+                  <span className="text-yellow-400 text-lg">🎲</span>
+                  <div>
+                    <div className="text-xs font-bold text-yellow-200">
+                      {levelUpTargetClass === ""
+                        ? (locale === "pt" ? "Subir 1 Nível (Aleatório)" : "Gain 1 Level (Random)")
+                        : (locale === "pt" ? `Subir 1 Nível em ${levelUpTargetClass}` : `Gain 1 Level in ${levelUpTargetClass}`)}
+                    </div>
+                    <div className="text-[10px] text-gray-400 mt-0.5 leading-normal">
+                      {levelUpTargetClass === ""
+                        ? (locale === "pt"
+                          ? "Evolui o personagem automaticamente respeitando todas as regras."
+                          : "Automatically advances the character following all rules.")
+                        : (locale === "pt"
+                          ? "Investe o nível na classe escolhida e concede o poder selecionado."
+                          : "Invests the level in the chosen class and grants the selected power.")}
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => {
+                    const targetStr = prompt(
+                      locale === "pt"
+                        ? `Nível alvo (atual: ${activeSheet.level}, máx: ${MAX_CHARACTER_LEVEL}):`
+                        : `Target level (current: ${activeSheet.level}, max: ${MAX_CHARACTER_LEVEL}):`,
+                      String(Math.min(activeSheet.level + 5, MAX_CHARACTER_LEVEL))
+                    );
+                    if (!targetStr) return;
+                    const target = parseInt(targetStr, 10);
+                    if (isNaN(target) || target <= activeSheet.level || target > MAX_CHARACTER_LEVEL) {
+                      alert(locale === "pt" ? "Nível inválido." : "Invalid level.");
+                      return;
+                    }
+                    try {
+                      let sheet = activeSheet;
+                      let firstStep = true;
+                      while (sheet.level < target) {
+                        sheet = levelUpCharacterStep(
+                          sheet,
+                          gameData.classes,
+                          strings,
+                          gameData.universalHeroicPowers ?? [],
+                          levelUpTargetClass === "" ? undefined : levelUpTargetClass,
+                          firstStep && levelUpTargetPower !== "" ? levelUpTargetPower : undefined,
+                        );
+                        firstStep = false;
+                      }
+                      applyLevelUpResult(sheet);
+                    } catch (e) {
+                      alert(locale === "pt"
+                        ? "Não foi possível subir de nível: " + String(e)
+                        : "Could not level up: " + String(e));
+                    }
+                  }}
+                  className="w-full jrpg-button p-3 text-left flex items-start gap-3 hover:border-cyan-300 group"
+                >
+                  <span className="text-cyan-400 text-lg">⚡</span>
+                  <div>
+                    <div className="text-xs font-bold text-cyan-200">
+                      {locale === "pt" ? "Ir para Nível X (Aleatório)" : "Jump to Level X (Random)"}
+                    </div>
+                    <div className="text-[10px] text-gray-400 mt-0.5 leading-normal">
+                      {locale === "pt"
+                        ? "Sobe vários níveis de uma vez, simulando toda a progressão."
+                        : "Levels up multiple times at once, simulating full progression."}
+                    </div>
+                  </div>
+                </button>
+              </div>
+
+              <div className="pt-2 flex justify-between items-center border-t border-white/10">
+                {activeRecordId !== null && (
+                  <button
+                    onClick={() => {
+                      playConfirm();
+                      setShowLevelUpModal(false);
+                      setCurrentScreen("sheet");
+                    }}
+                    className="jrpg-button px-3 py-1.5 text-[10px] text-cyan-300 border-cyan-400/50"
+                  >
+                    {locale === "pt" ? "Ver ficha →" : "View sheet →"}
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    playCancel();
+                    setLevelUpTargetClass("");
+                    setLevelUpTargetPower("");
+                    setShowLevelUpModal(false);
+                  }}
+                  className="jrpg-button px-4 py-1.5 text-[10px] ml-auto"
+                >
+                  {locale === "pt" ? "Cancelar" : "Cancel"}
+                </button>
+              </div>
+            </div>
+          </div>
         )}
 
       </main>

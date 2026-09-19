@@ -17,7 +17,7 @@ export const createLocalStorageCharacterRepository = (
       return [];
     }
   },
-  async save(sheet: CharacterSheet): Promise<void> {
+  async save(sheet: CharacterSheet): Promise<number> {
     const records = await this.load();
     const record: SavedCharacterRecord = {
       id: now(),
@@ -26,6 +26,16 @@ export const createLocalStorageCharacterRepository = (
       sheet_json: JSON.stringify(sheet),
     };
     storage.setItem(STORAGE_KEY, JSON.stringify([record, ...records]));
+    return record.id;
+  },
+  async update(id: number, sheet: CharacterSheet): Promise<void> {
+    const records = await this.load();
+    const updated = records.map((record) =>
+      record.id === id
+        ? { ...record, name: sheet.name, sheet_json: JSON.stringify(sheet) }
+        : record,
+    );
+    storage.setItem(STORAGE_KEY, JSON.stringify(updated));
   },
   async delete(id: number): Promise<void> {
     const records = await this.load();

@@ -12,6 +12,7 @@ interface CharacterSheetViewProps {
   onSave: (sheet: CharacterSheet) => void;
   onExport: (sheet: CharacterSheet) => void;
   onBack: () => void;
+  onLevelUp?: () => void;
   formatWeaponAttack: (weapon: Weapon, attributes: AttributeStats) => string;
 }
 
@@ -23,6 +24,7 @@ export const CharacterSheetView = ({
   onSave,
   onExport,
   onBack,
+  onLevelUp,
   formatWeaponAttack,
 }: CharacterSheetViewProps) => {
   const [showExportModal, setShowExportModal] = useState(false);
@@ -35,6 +37,15 @@ export const CharacterSheetView = ({
         </h2>
 
         <div className="flex gap-2">
+          {onLevelUp && sheet.level < 50 && (
+            <button
+              onClick={onLevelUp}
+              className="jrpg-button px-3 py-1.5 text-[10px] flex items-center gap-1.5 border-yellow-400 bg-yellow-950/40 text-yellow-300 hover:bg-yellow-900/60"
+            >
+              ⭐ {locale === "pt" ? "Subir Nível (Level Up)" : "Level Up"}
+            </button>
+          )}
+
           <button
             onClick={() => {
               onSave(sheet);
@@ -89,7 +100,9 @@ export const CharacterSheetView = ({
                       sheet.classes.map((c) => c.level)
                     )}
                   </p>
-                  <p className="text-[10px] text-cyan-400">Level 5 Hero</p>
+                  <p className="text-[10px] text-cyan-400 font-bold">
+                    {locale === "pt" ? `Nível Total: ${sheet.level}` : `Total Level: ${sheet.level}`}
+                  </p>
                 </div>
               </div>
 
@@ -201,6 +214,31 @@ export const CharacterSheetView = ({
                 </span>
               </div>
             </div>
+
+            {/* Heroic Powers list */}
+            {sheet.heroicPowers && sheet.heroicPowers.length > 0 && (
+              <div className="jrpg-panel p-4 space-y-4 font-mono text-xs border border-yellow-500/40">
+                <p className="text-[10px] text-yellow-300 font-bold border-b border-white/10 pb-1 mb-2 uppercase">
+                  👑 {locale === "pt" ? "PODERES HERÓICOS" : "HEROIC POWERS"}
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {sheet.heroicPowers.map((hp, idx) => (
+                    <div key={idx} className="bg-yellow-950/20 p-3 border border-yellow-500/30 space-y-1">
+                      <div className="flex justify-between items-center border-b border-yellow-500/20 pb-1">
+                        <span className="font-bold text-yellow-200">{hp.power.name}</span>
+                        <span className="text-[9px] bg-yellow-500/20 text-yellow-300 px-1.5 py-0.5 border border-yellow-400/30">
+                          {hp.source}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-white/80 leading-relaxed pt-1">
+                        {hp.power.mechanics || hp.power.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Powers list */}
             <div className="jrpg-panel p-4 space-y-4 font-mono text-xs">

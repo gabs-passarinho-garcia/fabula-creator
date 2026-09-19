@@ -333,6 +333,20 @@
           "description": "Eases Travel checks.",
           "mechanics": "You reduce the die rolled on your Travel checks by one step (minimum d6). This is not cumulative if more than one character has this power."
         }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Condition Immunity",
+          "requirements": "Master the wayfarer class.",
+          "description": "Become immune to a chosen condition.",
+          "mechanics": "You become Immune to a single condition of your choice."
+        },
+        {
+          "name": "Heroic Companion",
+          "requirements": "Master the wayfarer class and have the Faithful Companion power.",
+          "description": "Make your companion stronger.",
+          "mechanics": "You receive the following benefits: the companion's maximum HP increases by 10; your companion deals 5 additional damage; choose one of the companion's Attributes (Dexterity, Might, Insight, or Will) and increase its basic die by one step (maximum d12); the companion gains an additional power. Upon reaching level 40 (or if you have already surpassed it), the companion gains one more power."
+        }
       ]
     },
     {
@@ -372,6 +386,20 @@
           "maxLevel": 1,
           "description": "Allows binding and summoning Arcanum.",
           "mechanics": "You bind Arcanum to your soul to summon them later, spending an action and 40 MP. When choosing this power during character creation, you already start bound to one Arcanum of your choice."
+        }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Arcane Echoes",
+          "requirements": "Master the arcanist class.",
+          "description": "Influence clocks with your Arcanum.",
+          "mechanics": "If the domains of one or more Arcanum bound to you apply to a check to fill or erase one or more sections of a clock, on succeeding that check you may fill or erase an additional section. The GM has final say on whether a domain applies."
+        },
+        {
+          "name": "Revelation",
+          "requirements": "Master the arcanist class.",
+          "description": "Bind to a previously unknown Arcanum and improve its dismissal.",
+          "mechanics": "You make contact with an unknown Arcanum, binding it to your soul. This Arcanum must be created together with the group; while you live, no one else in your world can bind to it. Once per scene, while fused with an Arcanum, you can spend an action and 2 Fabula Points to trigger that Arcanum's dismissal effect (if any) without dismissing it — this does not trigger the Arcane Circle power."
         }
       ]
     },
@@ -413,6 +441,20 @@
           "description": "Accelerates active Projects.",
           "mechanics": "When working on a Project, up to (SL x 100) zenit of the material cost is paid automatically, and you generate (SL) extra progress per day. Effects from multiple characters with this power stack."
         }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Deep Pockets",
+          "requirements": "Master the tinkerer class.",
+          "description": "Reduce IP costs.",
+          "mechanics": "You reduce Inventory Point costs by 1 (minimum 1)."
+        },
+        {
+          "name": "Upgrade",
+          "requirements": "Master the tinkerer class.",
+          "description": "Change equipment traits.",
+          "mechanics": "During a rest, you may choose any number of weapons, armor, and/or shields owned by your group. For each item chosen, you may apply a trait (if it has none) or replace its current one with another, provided the new trait costs +1000 zenit or less and comes from the standard trait lists. At the end of the rest, spend zenit equal to the sum of all costs, reduced by (your Visionary power's SL x 100)."
+        }
       ]
     },
     {
@@ -452,6 +494,20 @@
           "maxLevel": 4,
           "description": "Trades attack damage for a control effect.",
           "mechanics": "After hitting with a ranged attack, you can forgo dealing damage to choose: the hit target(s) become shaken; or slow; or lose (SL x 10) MP."
+        }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Powerful Shot",
+          "requirements": "Master the sharpshooter class.",
+          "description": "Deal additional damage at range.",
+          "mechanics": "Your ranged attacks deal 5 additional damage. If you are level 40 or above, this damage increases to +10."
+        },
+        {
+          "name": "Perfect Aim",
+          "requirements": "Master the sharpshooter class and have the Warning Shot power.",
+          "description": "Choose two new options when using Warning Shot.",
+          "mechanics": "When you hit one or more creatures with a ranged attack and choose to forgo damage to use Warning Shot, you may choose two options instead of one."
         }
       ]
     },
@@ -494,6 +550,140 @@
           "mechanics": "Each level, learn one Elementalist spell. Offensive Elementalist spells use (INS + WIL) for the Magic check.",
           "grantsSpell": true
         }
+      ],
+      "spells": [
+        {
+          "name": "Elemental Weapon",
+          "pmCost": "10",
+          "target": "One weapon",
+          "duration": "Scene",
+          "isOffensive": false,
+          "mechanics": "You imbue a willing creature's equipped weapon with elemental energy. Choose a damage type: air, fire, ice, lightning, or earth. While the spell lasts, all damage dealt by the weapon becomes the chosen type. If you have that weapon equipped when casting, you may make a free attack with it as part of the same action."
+        },
+        {
+          "name": "Flare",
+          "pmCost": "20",
+          "target": "One creature",
+          "duration": "Instantaneous",
+          "isOffensive": true,
+          "mechanics": "You channel a beam of fire so hot it overwhelms the target's defenses, dealing (HR + 25) fire damage (this damage ignores Resistances)."
+        },
+        {
+          "name": "Fulgur",
+          "pmCost": "10 × M",
+          "target": "Up to three creatures",
+          "duration": "Instantaneous",
+          "isOffensive": true,
+          "mechanics": "You manipulate electricity into a wave of lightning, dealing (HR + 15) lightning damage to each target. Opportunity: hit targets also become dazed."
+        },
+        {
+          "name": "Glacies",
+          "pmCost": "10 × M",
+          "target": "Up to three creatures",
+          "duration": "Instantaneous",
+          "isOffensive": true,
+          "mechanics": "You cover your foes in dense ice, dealing (HR + 15) ice damage to each target. Opportunity: hit targets also become slow."
+        },
+        {
+          "name": "Overflight Strike",
+          "pmCost": "10",
+          "target": "Self",
+          "duration": "Instantaneous",
+          "isOffensive": false,
+          "mechanics": "The wind carries your attacks across the battlefield. Make a free attack with an equipped melee weapon, which can hit flying targets. If you used a sword, spear, or brawling weapon, the attack deals 5 additional damage. A hit flying target is forced to land."
+        },
+        {
+          "name": "Iceberg",
+          "pmCost": "20",
+          "target": "One creature",
+          "duration": "Instantaneous",
+          "isOffensive": true,
+          "mechanics": "A magical pillar of ice lowers the target's temperature to a critical level, dealing (HR + 25) ice damage (this damage ignores Resistances)."
+        },
+        {
+          "name": "Ignis",
+          "pmCost": "10 × M",
+          "target": "Up to three creatures",
+          "duration": "Instantaneous",
+          "isOffensive": true,
+          "mechanics": "You conjure flames in the air and unleash a rain of fire, dealing (HR + 15) fire damage to each target. Opportunity: each hit target becomes shaken."
+        },
+        {
+          "name": "Elemental Shroud",
+          "pmCost": "5 × M",
+          "target": "Up to three creatures",
+          "duration": "Scene",
+          "isOffensive": false,
+          "mechanics": "You protect the targets against the fury of the elements. Choose a damage type: air, fire, ice, lightning, or earth. While the spell lasts, each target becomes Resistant to the chosen damage type."
+        },
+        {
+          "name": "Boulder",
+          "pmCost": "20",
+          "target": "One creature",
+          "duration": "Instantaneous",
+          "isOffensive": true,
+          "mechanics": "You summon a colossal rock against the enemy, dealing (HR + 25) earth damage (this damage ignores Resistances)."
+        },
+        {
+          "name": "Lightning",
+          "pmCost": "20",
+          "target": "One creature",
+          "duration": "Instantaneous",
+          "isOffensive": true,
+          "mechanics": "You hurl a bolt of lightning at your foe, dealing (HR + 25) lightning damage (this damage ignores Resistances)."
+        },
+        {
+          "name": "Earth",
+          "pmCost": "10 × M",
+          "target": "Up to three creatures",
+          "duration": "Instantaneous",
+          "isOffensive": true,
+          "mechanics": "Pinnacles of rock surround your enemies, dealing (HR + 15) earth damage to each target (cannot target flying or suspended creatures). Opportunity: hit targets take one fewer action on their next turn (minimum zero)."
+        },
+        {
+          "name": "Ventus",
+          "pmCost": "10 × M",
+          "target": "Up to three creatures",
+          "duration": "Instantaneous",
+          "isOffensive": true,
+          "mechanics": "You summon the power of the winds, dealing (HR + 15) air damage to each target. Opportunity: hit flying targets are forced to land."
+        },
+        {
+          "name": "Vortex",
+          "pmCost": "20",
+          "target": "One creature",
+          "duration": "Scene",
+          "isOffensive": true,
+          "mechanics": "You strike the enemy with high-pressure winds, dealing (HR + 25) air damage (this damage ignores Resistances)."
+        }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Volcano",
+          "requirements": "Master the elementalist class.",
+          "description": "Learn the Volcano spell.",
+          "mechanics": "You learn the ultimate Elementalist spell, Volcano (you may rename it and swap its damage type for air, ice, lightning, or earth).",
+          "grantsSpell": true,
+          "spell": {
+            "name": "Volcano",
+            "pmCost": "40",
+            "target": "Special",
+            "duration": "Instantaneous",
+            "isOffensive": true,
+            "mechanics": "You channel the planet's fury into a powerful wave of fire and magma. Choose one: deal 50 fire damage to one visible creature; or deal 30 fire damage to all visible enemies. If you are level 20 or above, this damage increases by 5; if level 40 or above, it increases by 10. Damage from this spell ignores Resistances and Immunities."
+          }
+        },
+        {
+          "name": "Powerful Spell",
+          "requirements": "Master one or more of the following classes: elementalist, entropist, spiritist, or chimerist.",
+          "sharedWith": [
+            "Entropist",
+            "Spiritist",
+            "Chimerist"
+          ],
+          "description": "Deal additional damage with spells.",
+          "mechanics": "Your spells deal 5 additional damage. If you are level 40 or above, this damage increases to +10."
+        }
       ]
     },
     {
@@ -534,6 +724,132 @@
           "maxLevel": 4,
           "description": "Manipulates time in combat by spending MP.",
           "mechanics": "In a conflict, spend an action and up to (SL x 5) MP. For every 5 MP: make a creature slow, or remove that condition; or grant a free Equipment action; or deal (10 + SL x 5) damage to a slow enemy; or allow an ally who hasn't acted yet to take their turn right after yours."
+        }
+      ],
+      "spells": [
+        {
+          "name": "Haste",
+          "pmCost": "20",
+          "target": "One creature",
+          "duration": "Scene",
+          "isOffensive": false,
+          "mechanics": "At the end of each of the target's turns, they may choose: make a free attack with their equipped weapon; or perform the Spell action without spending an action, casting a spell with a total cost of up to 10 MP (paying the cost). The spell ends when the target uses this effect a second time."
+        },
+        {
+          "name": "Anomaly",
+          "pmCost": "20",
+          "target": "One creature",
+          "duration": "Scene",
+          "isOffensive": true,
+          "mechanics": "You alter the target's natural essence. While the spell lasts, if the target would take damage of a type it is Absorbent or Immune to, it is instead considered Vulnerable. When this happens, the spell ends."
+        },
+        {
+          "name": "Gamble",
+          "pmCost": "up to 20",
+          "target": "Special",
+          "duration": "Instantaneous",
+          "isOffensive": false,
+          "mechanics": "You summon a vortex of chaotic energy. Roll your current Will die once for every 10 MP spent and choose one result, which determines the effect: 1) you lose half your current HP and MP; 2-3) all creatures in the scene, including you, become poisoned; 4-6) all become slow; 7-8) choose up to three creatures, each recovers 50 HP and all conditions; 9+) choose visible creatures and deal 30 damage (type determined by a d6: 1-air, 2-lightning, 3-dark, 4-earth, 5-fire, 6-poison)."
+        },
+        {
+          "name": "Dark Weapon",
+          "pmCost": "5",
+          "target": "One equipped weapon",
+          "duration": "Scene",
+          "isOffensive": false,
+          "mechanics": "You imbue the weapon with dark energy. While it lasts, damage dealt by the weapon becomes dark. If you have that weapon equipped when casting, you may make a free attack with it as part of the same action."
+        },
+        {
+          "name": "Dispel",
+          "pmCost": "10",
+          "target": "One creature",
+          "duration": "Instantaneous",
+          "isOffensive": false,
+          "mechanics": "You remove all magic from a creature. If the target is under the effect of one or more spells with duration 'Scene', those effects end."
+        },
+        {
+          "name": "Drain Spirit",
+          "pmCost": "5",
+          "target": "One creature",
+          "duration": "Instantaneous",
+          "isOffensive": true,
+          "mechanics": "You consume a creature's psyche. The target loses (HR + 20) MP. You recover MP equal to half the MP lost by the target (if the target has no more MP, you recover none)."
+        },
+        {
+          "name": "Drain Might",
+          "pmCost": "10",
+          "target": "One creature",
+          "duration": "Instantaneous",
+          "isOffensive": true,
+          "mechanics": "You steal the target's life force, dealing (HR + 15) dark damage. You recover HP equal to half the HP loss caused (if the target has no more HP, you recover none)."
+        },
+        {
+          "name": "Divination",
+          "pmCost": "10",
+          "target": "Self",
+          "duration": "Scene",
+          "isOffensive": false,
+          "mechanics": "You catch a glimpse of the future. While it lasts, when a visible creature makes a check that is neither a fumble nor a critical success, you may force it to roll both dice again. The spell ends after forcing two new rolls."
+        },
+        {
+          "name": "Mirror",
+          "pmCost": "10",
+          "target": "One creature",
+          "duration": "Scene",
+          "isOffensive": false,
+          "mechanics": "You distort the laws of magic. While it lasts, if an offensive spell is cast against the target, the caster becomes the target instead (other targets are chosen normally). When this happens, the spell ends."
+        },
+        {
+          "name": "Stop",
+          "pmCost": "10",
+          "target": "One creature",
+          "duration": "Instantaneous",
+          "isOffensive": true,
+          "mechanics": "You trap the enemy in a circle of altered time and space. The target takes one fewer action on their next turn (minimum of 0 actions)."
+        },
+        {
+          "name": "Umbra",
+          "pmCost": "10 × M",
+          "target": "Up to three creatures",
+          "duration": "Instantaneous",
+          "isOffensive": true,
+          "mechanics": "A storm of dark energy turns matter to ash, dealing (HR + 15) dark damage to each target. Opportunity: hit targets also become weak."
+        },
+        {
+          "name": "Omega",
+          "pmCost": "15",
+          "target": "One creature",
+          "duration": "Instantaneous",
+          "isOffensive": true,
+          "mechanics": "You call down ruin upon your enemy, turning strength into weakness. The target loses an amount of HP equal to (20 + half the target's level)."
+        }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Comet",
+          "requirements": "Master the entropist class.",
+          "description": "Learn the Comet spell.",
+          "mechanics": "You learn the ultimate Entropist spell, Comet.",
+          "grantsSpell": true,
+          "spell": {
+            "name": "Comet",
+            "pmCost": "50",
+            "target": "Special",
+            "duration": "Instantaneous",
+            "isOffensive": true,
+            "mechanics": "You open a great portal to the Cosmos, summoning an astral rock from the void. Choose one: deal 60 damage to one visible creature; or deal 40 damage to all visible enemies. This damage increases by +5 if you are level 20 or above, and by +10 if level 40 or above. This damage has no type (so it is unaffected by damage Affinities)."
+          }
+        },
+        {
+          "name": "Powerful Spell",
+          "requirements": "Master one or more of the following classes: elementalist, entropist, spiritist, or chimerist.",
+          "sharedWith": [
+            "Elementalist",
+            "Spiritist",
+            "Chimerist"
+          ],
+          "description": "Deal additional damage with spells.",
+          "mechanics": "Your spells deal 5 additional damage. If you are level 40 or above, this damage increases to +10."
         }
       ]
     },
@@ -576,6 +892,140 @@
           "description": "Pays the cost of spells with HP instead of MP.",
           "mechanics": "If you do not have enough MP for a spell, you can spend HP equal to (10 + the total MP cost) instead. If the spell would heal HP, that effect does not apply to you."
         }
+      ],
+      "spells": [
+        {
+          "name": "Hallucination",
+          "pmCost": "5 × M",
+          "target": "Up to three creatures",
+          "duration": "Instantaneous",
+          "isOffensive": true,
+          "mechanics": "You warp your enemies' senses with bizarre hallucinations. Choose shaken or dazed: each hit target is afflicted with the chosen condition."
+        },
+        {
+          "name": "Spirit Weapon",
+          "pmCost": "5",
+          "target": "One equipped weapon",
+          "duration": "Scene",
+          "isOffensive": false,
+          "mechanics": "You imbue the weapon with your spirit's purifying energy. While it lasts, damage dealt by the weapon becomes light damage. If you have the weapon equipped when casting, you may make a free attack with it as part of the same action."
+        },
+        {
+          "name": "Aura",
+          "pmCost": "5 × M",
+          "target": "Up to three creatures",
+          "duration": "Scene",
+          "isOffensive": false,
+          "mechanics": "You project your soul outside your body, shielding targets from dangerous magic. While it lasts, the targets' Magic Defense becomes 12 (a target may still use its own Magic Defense if higher). At level 20 this rises to 13; at level 40, to 14."
+        },
+        {
+          "name": "Barrier",
+          "pmCost": "5 × M",
+          "target": "Up to three creatures",
+          "duration": "Scene",
+          "isOffensive": false,
+          "mechanics": "You project your soul outside your body as a barrier against attacks. While it lasts, the targets' Defense becomes 12 (a target may still use its own Defense if higher). At level 20 this rises to 13; at level 40, to 14."
+        },
+        {
+          "name": "Spirit Bastion",
+          "pmCost": "5 × M",
+          "target": "Up to three creatures",
+          "duration": "Scene",
+          "isOffensive": false,
+          "mechanics": "You protect the targets with magical energy. Choose a damage type among light, dark, or poison. While it lasts, each target becomes Resistant to the chosen damage."
+        },
+        {
+          "name": "Heal",
+          "pmCost": "10 × M",
+          "target": "Up to three creatures",
+          "duration": "Instantaneous",
+          "isOffensive": false,
+          "mechanics": "You revitalize your companions, easing pain and curing fatigue. Each target recovers 40 HP (50 at level 20, 60 at level 40)."
+        },
+        {
+          "name": "Awaken",
+          "pmCost": "20",
+          "target": "One creature",
+          "duration": "Scene",
+          "isOffensive": false,
+          "mechanics": "You allow a creature to focus its vital energy. Choose an Attribute: Dexterity, Might, Insight, or Will. While it lasts, the target treats that Attribute's die as one step larger (maximum d12)."
+        },
+        {
+          "name": "Enrage",
+          "pmCost": "10",
+          "target": "One creature",
+          "duration": "Instantaneous",
+          "isOffensive": true,
+          "mechanics": "You make a creature lose its composure and act completely out of control. The target becomes enraged and cannot take the Guard or Spell action until the end of its next turn."
+        },
+        {
+          "name": "Lux",
+          "pmCost": "10 × M",
+          "target": "Up to three creatures",
+          "duration": "Instantaneous",
+          "isOffensive": true,
+          "mechanics": "You focus your inner energy into a barrage of blinding sunbeams, dealing (HR + 15) light damage to each target. Opportunity: hit targets also become dazed."
+        },
+        {
+          "name": "Mercy",
+          "pmCost": "20",
+          "target": "One creature",
+          "duration": "Scene",
+          "isOffensive": false,
+          "mechanics": "You strengthen a creature's courage against suffering and despair. While it lasts, if the target would be reduced to 0 HP, it instead is reduced to exactly 1 HP. When this happens, the spell ends."
+        },
+        {
+          "name": "Purify",
+          "pmCost": "5 × M",
+          "target": "Up to three creatures",
+          "duration": "Instantaneous",
+          "isOffensive": false,
+          "mechanics": "You fortify and purify your companions' soul energy. All targets recover from all conditions."
+        },
+        {
+          "name": "Reinforce",
+          "pmCost": "5 × M",
+          "target": "Up to three creatures",
+          "duration": "Scene",
+          "isOffensive": false,
+          "mechanics": "You protect the targets from effects that would corrupt body and spirit. Choose shaken, dazed, enraged, poisoned, weak, or slow. While it lasts, each target becomes immune to the chosen condition."
+        },
+        {
+          "name": "Torpor",
+          "pmCost": "5 × M",
+          "target": "Up to three creatures",
+          "duration": "Instantaneous",
+          "isOffensive": true,
+          "mechanics": "You smother your enemies' soul energy, hindering their movements. Choose weak or slow: each hit target is afflicted with the chosen condition."
+        }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Hope",
+          "requirements": "Master the spiritist class.",
+          "description": "Learn the Hope spell.",
+          "mechanics": "You learn the ultimate Spiritist spell, Hope.",
+          "grantsSpell": true,
+          "spell": {
+            "name": "Hope",
+            "pmCost": "40",
+            "target": "Special",
+            "duration": "Instantaneous",
+            "isOffensive": false,
+            "mechanics": "You rekindle the flames of courage and hope in a defeated hero. Choose a PC who has surrendered and is still narratively present in the scene: that target immediately regains consciousness and recovers HP equal to half their maximum HP. This does not cancel the consequences of the character's surrender and has no effect if they have left the scene as part of surrendering. A PC can only be affected by this spell once per scene."
+          }
+        },
+        {
+          "name": "Powerful Spell",
+          "requirements": "Master one or more of the following classes: elementalist, entropist, spiritist, or chimerist.",
+          "sharedWith": [
+            "Elementalist",
+            "Entropist",
+            "Chimerist"
+          ],
+          "description": "Deal additional damage with spells.",
+          "mechanics": "Your spells deal 5 additional damage. If you are level 40 or above, this damage increases to +10."
+        }
       ]
     },
     {
@@ -615,6 +1065,23 @@
           "maxLevel": 5,
           "description": "Heals HP and improves an Attribute when taking the Guard action.",
           "mechanics": "When taking the Guard action without choosing to cover anyone, recover HP equal to (SL x the highest strength Bond you have) and choose Might or Will: until the end of your next turn, the current die of that Attribute increases by one step (maximum d12)."
+        }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Gorilla Hand",
+          "requirements": "Master the fury class.",
+          "description": "Equip some two-handed weapons in one hand slot.",
+          "mechanics": "You may equip two-handed weapons of category sword, spear, flail, and heavy using a single hand slot. In addition, the first attack you make with a two-handed weapon each turn deals 5 additional damage and ignores Resistances."
+        },
+        {
+          "name": "Powerful Strike",
+          "requirements": "Master one or more of the following classes: fury or weaponmaster.",
+          "sharedWith": [
+            "Weaponmaster"
+          ],
+          "description": "Deal additional melee damage.",
+          "mechanics": "Your melee attacks deal 5 additional damage. If you are level 40 or above, this damage increases to +10."
         }
       ]
     },
@@ -656,6 +1123,20 @@
           "description": "Takes the danger in place of an ally.",
           "mechanics": "When another creature is targeted by an attack, spell, or danger, you can take their place: the checks involved are instead rolled against you. Cannot be used again until the start of your next turn in a conflict."
         }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Unbeatable",
+          "requirements": "Master the guardian class.",
+          "description": "Survive a fatal blow once per scene.",
+          "mechanics": "Once per scene, when you are about to be reduced to 0 HP, you may instead endure the pain and remain at exactly 1 HP."
+        },
+        {
+          "name": "Rampart",
+          "requirements": "Master the guardian class.",
+          "description": "Resist damage and conditions during the first round.",
+          "mechanics": "At the start of the first round of each conflict scene, you become Resistant to all damage types and cannot suffer conditions (but do not recover from previous ones). This benefit lasts until the end of the first round."
+        }
       ]
     },
     {
@@ -694,6 +1175,20 @@
           "maxLevel": 1,
           "description": "Disappears from the scene and reappears elsewhere.",
           "mechanics": "Spend an action and 1 Fabula Point to disappear from the current scene and reappear whenever you want in another scene with another PC."
+        }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Vanish",
+          "requirements": "Master the rogue class.",
+          "description": "Disappear after an attack.",
+          "mechanics": "When you hit one or more creatures with an attack, you may spend 1 Fabula Point. If you do, each of those creatures becomes unable to see you until the start of your next turn."
+        },
+        {
+          "name": "Plunder",
+          "requirements": "Master the rogue class and have the Soul Theft power.",
+          "description": "Steal from several creatures.",
+          "mechanics": "When using Soul Theft, you may target any number of creatures at once (make a single check and compare it against each targeted creature's Magic Defense)."
         }
       ]
     },
@@ -735,6 +1230,20 @@
           "description": "Darkness and poison Resistance during a crisis.",
           "mechanics": "While in crisis, you gain Resistance to dark damage and poison damage."
         }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Adversity",
+          "requirements": "Master the dark blade class.",
+          "description": "Draw strength from conditions.",
+          "mechanics": "While suffering one or more conditions, you receive +1 on all checks and deal 2 additional damage (with Arcanum, attacks, spells, items, or any other method) for each condition you are suffering."
+        },
+        {
+          "name": "Soulless",
+          "requirements": "Master the dark blade class.",
+          "description": "Sacrifice HP to deal damage.",
+          "mechanics": "When you hit a creature with an attack, if that creature is the only target and you share a Bond with it, you may spend half your current HP (rounded down). If you do, the attack deals additional damage equal to (10 x the strength of your Bond with the target). This can only be used once on each of your turns in a conflict."
+        }
       ]
     },
     {
@@ -775,6 +1284,23 @@
           "description": "Special attack that destroys equipment or causes continuous damage.",
           "mechanics": "Spend an action and 5 MP to make a single-target free melee attack that deals no damage; if it hits, choose: destroy the target's shield; or destroy their armor; or cause them to take (SL x 2) additional damage from all sources until your next turn."
         }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Tempest Strike",
+          "requirements": "Master the weaponmaster class.",
+          "description": "Focus multi attacks on a single target.",
+          "mechanics": "When making a melee attack with the multi property, you receive a bonus on your Accuracy check equal to that multi value, and the attack deals 5 additional damage. If it hits a single creature, it deals 5 more damage."
+        },
+        {
+          "name": "Powerful Strike",
+          "requirements": "Master one or more of the following classes: fury or weaponmaster.",
+          "sharedWith": [
+            "Fury"
+          ],
+          "description": "Deal additional melee damage.",
+          "mechanics": "Your melee attacks deal 5 additional damage. If you are level 40 or above, this damage increases to +10."
+        }
       ]
     },
     {
@@ -813,6 +1339,20 @@
           "maxLevel": 2,
           "description": "Accelerates the filling of social clocks.",
           "mechanics": "When succeeding on a charm, diplomacy, deception, or intimidation check to fill/erase sections of a clock, spend up to (SL x 20) MP to fill/erase one additional section for every 20 MP spent."
+        }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Repeat",
+          "requirements": "Master the orator class.",
+          "description": "Condemn or Encourage twice.",
+          "mechanics": "Once per turn in a conflict, after using Condemn or Encourage, you may reuse it (on the same target or a different one). You still must pay the MP cost for this second use."
+        },
+        {
+          "name": "Disarming Rhetoric",
+          "requirements": "Master the orator class.",
+          "description": "Convince enemies to retreat.",
+          "mechanics": "During a conflict scene, use an action to choose a soldier-rank creature that can hear and understand you. If that creature is shaken or in crisis, you may spend MP equal to (20 + half the target creature's level) to make it leave the conflict peacefully."
         }
       ]
     },
@@ -854,6 +1394,25 @@
           "description": "Allows rituals of the chimerism discipline.",
           "mechanics": "You can perform chimerism rituals. Upon acquiring this power, choose (INS+WIL) or (MIG+WIL) for the Magic check of these rituals."
         }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Chimeric Dominion",
+          "requirements": "Master the chimerist class.",
+          "description": "Learn spells from new species and increase your limit.",
+          "mechanics": "Choose two species among construct, fiend, elemental, and undead. You may use Feral Mimicry to learn spells from creatures of the chosen species. This heroic power may be acquired up to twice (choosing two species each time). Each time you acquire it, your memorized Chimerist spell limit increases by +2."
+        },
+        {
+          "name": "Powerful Spell",
+          "requirements": "Master one or more of the following classes: elementalist, entropist, spiritist, or chimerist.",
+          "sharedWith": [
+            "Elementalist",
+            "Entropist",
+            "Spiritist"
+          ],
+          "description": "Deal additional damage with spells.",
+          "mechanics": "Your spells deal 5 additional damage. If you are level 40 or above, this damage increases to +10."
+        }
       ]
     },
     {
@@ -893,7 +1452,53 @@
           "description": "Perfectly recalls recent scenes.",
           "mechanics": "You perfectly recall any scene experienced within the last week, allowing you to mentally revisit it and use Flash of Insight on it."
         }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Mathemagic",
+          "requirements": "Master the lorefinder class.",
+          "description": "Extend single-target spells.",
+          "mechanics": "When casting a spell targeting 'one creature,' choose an Attribute and a die type. The spell's target becomes 'all creatures in the scene whose basic die of the chosen Attribute matches your choice,' and its total MP cost is doubled (adjust the spell's text from 'the target' to 'each target,' or 'one or more targets' for Anomaly, Dispel, Mirror, or Mercy). If it is an offensive spell, make a single Magic check compared against each target's Magic Defense."
+        },
+        {
+          "name": "Predictable!",
+          "requirements": "Master the lorefinder class.",
+          "description": "Force an enemy to spend MP to perform specific actions.",
+          "mechanics": "In a conflict, spend an action and 20 MP to anticipate the movements of a visible creature of which you know two or more Traits. Choose an action type (Attack, Spell, Guard, Objective, or Power). Until the start of your next turn, that creature must spend 20 MP whenever it wants to perform that action; if it cannot, it must take a different action."
+        }
       ]
+    }
+  ],
+  "universalHeroicPowers": [
+    {
+      "name": "Ambidexterity",
+      "requirements": null,
+      "description": "Fight with two weapons of different categories.",
+      "mechanics": "You may apply the benefits of dual-wielding to any weapon, even ones belonging to different categories or where one is melee and the other ranged (such as a dagger and a firearm). While you have two weapons equipped that do not share a category, you receive a +2 bonus to Defense and the second attack you make on each of your turns deals 5 additional damage."
+    },
+    {
+      "name": "Extra Spells",
+      "requirements": null,
+      "description": "Learn two spells from a class of your choice.",
+      "mechanics": "Upon acquiring this power, learn two spells from one of the following lists: elementalist, entropist, or spiritist. Both spells must be from the same list and follow that class's standard rules to be cast."
+    },
+    {
+      "name": "Extra MP",
+      "requirements": null,
+      "description": "Increase your maximum MP.",
+      "mechanics": "Permanently increase your maximum MP by 10. If you are level 40 or above, this additional MP increases to 20."
+    },
+    {
+      "name": "Extra IP",
+      "requirements": null,
+      "description": "Increase your maximum IP.",
+      "mechanics": "Permanently increase your maximum IP by 4."
+    },
+    {
+      "name": "Extra HP",
+      "requirements": null,
+      "description": "Increase your maximum HP.",
+      "mechanics": "Permanently increase your maximum HP by 10. If you are level 40 or above, this additional HP increases to 20."
     }
   ]
 }

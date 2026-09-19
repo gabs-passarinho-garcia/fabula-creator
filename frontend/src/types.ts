@@ -28,6 +28,13 @@ export interface Spell {
   mechanics: string;
 }
 
+export interface HeroicPower {
+  name: string;
+  requirements?: string | null;
+  description: string;
+  mechanics: string;
+}
+
 export interface RpgClass {
   name: string;
   description: string;
@@ -35,6 +42,8 @@ export interface RpgClass {
   powers: ClassPower[];
   /** Only present for caster classes (Elementalista, Entropista, Espiritualista). */
   spells?: Spell[];
+  /** Class-specific Heroic Powers unlocked when mastering the class (level 10). */
+  heroicPowers?: HeroicPower[];
 }
 
 export interface Weapon {
@@ -130,6 +139,7 @@ export interface CharacterCreationData {
   startingEquipment: CharacterEquipment;
   equipmentCatalog: EquipmentCatalog;
   startingBudget: number;
+  universalHeroicPowers?: HeroicPower[];
 }
 
 export type AttributeStats = Record<string, number>;
@@ -166,13 +176,20 @@ export interface SelectedSpell {
   grantIndex: number;
 }
 
+export interface SelectedHeroicPower {
+  power: HeroicPower;
+  source: string; // Class name or "Universal"
+}
+
 export interface CharacterSheet {
   name: string;
   identity: string;
   theme: string;
+  level: number;
   classes: SelectedClass[];
   powers: SelectedPower[];
   spells: SelectedSpell[];
+  heroicPowers?: SelectedHeroicPower[];
   attributes: AttributeStats;
   equipment: CharacterEquipment;
   derivedStats: DerivedStats;

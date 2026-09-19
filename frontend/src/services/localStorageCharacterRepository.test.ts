@@ -19,14 +19,32 @@ const setup = () => {
 describe("local storage character repository", () => {
   test("round-trips and deletes saved sheets", async () => {
     const { repository, sheet } = setup();
-    await repository.save(sheet);
+    const id = await repository.save(sheet);
     const records = await repository.load();
 
     expect(records).toHaveLength(1);
+    expect(records[0]?.id).toBe(id);
     expect(records[0]?.name).toBe("Test Hero");
     expect(JSON.parse(records[0]?.sheet_json ?? "{}").name).toBe("Test Hero");
 
     await repository.delete(records[0]?.id ?? -1);
     expect(await repository.load()).toHaveLength(0);
+  });
+
+  test("update overwrites the evolved sheet without duplicating the record", async () => {
+    const { repository, sheet } = setup();
+    const id = await repository.save(sheet);
+    const evolved = { ...sheet, name: "Test Hero", level: 25 } as CharacterSheet;
+
+    await repository.update(id, evolved);
+
+    const records = await repository.load();
+    expect(records).toHaveLength(1);
+    expect(records[0]?.id).toBe(id);
+    expect(JSON.parse(records[0]?.sheet_json ?? "{}").level).toBe(25);
+
+    // Updating an unknown id is a no-op instead of throwing or duplicating
+    await repository.update(id + 999, { ...sheet, name: "Ghost" } as CharacterSheet);
+    expect(await repository.load()).toHaveLength(1);
   });
 });

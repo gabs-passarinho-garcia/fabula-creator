@@ -24,6 +24,16 @@ fn load_characters(state: tauri::State<'_, DbState>) -> Result<Vec<SavedCharacte
 }
 
 #[tauri::command]
+fn update_character(
+  state: tauri::State<'_, DbState>,
+  id: i64,
+  name: String,
+  sheet_json: String,
+) -> Result<(), String> {
+  CharacterDatabase::open(&state.db_path)?.update(id, &name, &sheet_json)
+}
+
+#[tauri::command]
 fn delete_character(state: tauri::State<'_, DbState>, id: i64) -> Result<(), String> {
   CharacterDatabase::open(&state.db_path)?.delete(id)
 }
@@ -57,6 +67,7 @@ pub fn run() {
     .invoke_handler(tauri::generate_handler![
       save_character,
       load_characters,
+      update_character,
       delete_character
     ])
     .run(tauri::generate_context!())

@@ -333,6 +333,20 @@
           "description": "Facilita testes de Viagem.",
           "mechanics": "Você reduz o dado rolado em seus testes de Viagem em um passo (mínimo d6). Não é cumulativo se mais de um personagem tiver este poder."
         }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Imunidade à Condição",
+          "requirements": "Dominar a classe andarilho.",
+          "description": "Torna-se imune a uma condição escolhida.",
+          "mechanics": "Você se torna Imune a uma única condição à sua escolha."
+        },
+        {
+          "name": "Companheiro Heroico",
+          "requirements": "Dominar a classe andarilho e ter o poder Companheiro Fiel.",
+          "description": "Torna seu companheiro mais forte.",
+          "mechanics": "Você recebe os seguintes benefícios: os PV máximos do companheiro aumentam em 10; seu companheiro causa 5 pontos de dano adicional; escolha um Atributo do companheiro (Destreza, Vigor, Astúcia ou Vontade) e aumente seu dado básico em um passo (máximo d12); o companheiro recebe um poder adicional. Ao alcançar o 40º nível (ou se já o tiver ultrapassado), o companheiro recebe mais um poder."
+        }
       ]
     },
     {
@@ -372,6 +386,20 @@
           "maxLevel": 1,
           "description": "Permite vincular e invocar Arcanos.",
           "mechanics": "Você vincula Arcanos à sua alma para invocá-los depois, gastando uma ação e 40 PM. Ao escolher este poder na criação de personagem, você já começa vinculado a um Arcano à sua escolha."
+        }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Ecos Arcanos",
+          "requirements": "Dominar a classe arcanista.",
+          "description": "Influencie relógios com seus Arcanos.",
+          "mechanics": "Se os domínios de um ou mais Arcanos vinculados a você forem aplicáveis a um teste para apagar ou preencher uma ou mais seções de um relógio, ao obter sucesso no teste, você pode apagar ou preencher uma seção adicional desse relógio. O mestre tem a palavra final se um domínio é aplicável ou não."
+        },
+        {
+          "name": "Revelação",
+          "requirements": "Dominar a classe arcanista.",
+          "description": "Vincule-se a um Arcano antes desconhecido e melhore a dispensa.",
+          "mechanics": "Você faz contato com um Arcano desconhecido, vinculando-o à sua alma. Esse Arcano deve ser criado em conjunto com o grupo; enquanto você viver, ninguém mais no seu mundo pode se vincular a ele. Uma vez por cena, enquanto estiver fundido a um Arcano, você pode usar uma ação e gastar 2 Pontos de Fabula para acionar o efeito de dispensa desse Arcano (se houver) sem dispensá-lo — isso não ativa o poder Círculo Arcano."
         }
       ]
     },
@@ -413,6 +441,20 @@
           "description": "Acelera Projetos em andamento.",
           "mechanics": "Ao trabalhar num Projeto, até (NP x 100) zênites do custo de material são pagos automaticamente, e você gera (NP) de progresso extra por dia. Efeitos de múltiplos personagens com este poder se acumulam."
         }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Bolsos Fundos",
+          "requirements": "Dominar a classe inventor.",
+          "description": "Reduza os custos de PI.",
+          "mechanics": "Você reduz custos de Pontos de Inventário em -1 (mínimo 1)."
+        },
+        {
+          "name": "Melhoria",
+          "requirements": "Dominar a classe inventor.",
+          "description": "Mude características de equipamento.",
+          "mechanics": "Em um descanso, você pode escolher qualquer número de armas, armaduras e/ou escudos entre aqueles em posse do seu grupo. Para cada item escolhido, você pode aplicar uma característica (se não tiver uma) ou substituir a atual por outra, desde que custem +1000 zênites ou menos e estejam nas listas padrão. No fim do descanso, gaste zênites iguais à soma dos custos, reduzida por (NP do poder Visionário x 100)."
+        }
       ]
     },
     {
@@ -452,6 +494,20 @@
           "maxLevel": 4,
           "description": "Troca o dano do ataque por um efeito de controle.",
           "mechanics": "Após acertar um ataque à distância, você pode abrir mão do dano e escolher: o(s) alvo(s) atingido(s) fica(m) abalado; ou lento; ou perde(m) (NP x 10) PM."
+        }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Tiro Poderoso",
+          "requirements": "Dominar a classe atirador.",
+          "description": "Cause dano adicional à distância.",
+          "mechanics": "Seus ataques à distância causam 5 pontos de dano adicional. Se estiver no 40° nível ou acima, esse dano aumenta para +10."
+        },
+        {
+          "name": "Mira Perfeita",
+          "requirements": "Dominar a classe atirador e ter o poder Tiro de Aviso.",
+          "description": "Escolha duas novas opções ao usar Tiro de Aviso.",
+          "mechanics": "Quando atinge uma ou mais criaturas com um ataque à distância e escolhe não causar dano para usar Tiro de Aviso, você pode escolher duas opções em vez de uma."
         }
       ]
     },
@@ -600,6 +656,34 @@
           "isOffensive": true,
           "mechanics": "Você ataca o inimigo com ventos de alta pressão, causando (RA + 25) pontos de dano de ar (este dano ignora Resistências)."
         }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Vulcão",
+          "requirements": "Dominar a classe elementalista.",
+          "description": "Aprenda o feitiço Vulcão.",
+          "mechanics": "Você aprende o feitiço supremo de elementalista: Vulcão (pode mudar seu nome e o tipo de dano para ar, gelo, raio ou terra).",
+          "grantsSpell": true,
+          "spell": {
+            "name": "Vulcão",
+            "pmCost": "40",
+            "target": "Especial",
+            "duration": "Instantânea",
+            "isOffensive": true,
+            "mechanics": "Você canaliza a fúria do planeta em uma poderosa onda de fogo e magma. Escolha uma opção: causa 50 pontos de dano de fogo a uma criatura que você possa ver; ou causa 30 pontos de dano de fogo a todos os inimigos que possa ver. Se estiver no 20° nível ou acima, esse dano aumenta em 5; se estiver no 40° nível ou acima, aumenta em 10. Dano causado por este feitiço ignora Resistências e Imunidades."
+          }
+        },
+        {
+          "name": "Feitiço Poderoso",
+          "requirements": "Dominar uma ou mais classes entre elementalista, entropista, espiritualista e quimerista.",
+          "sharedWith": [
+            "Entropista",
+            "Espiritualista",
+            "Quimerista"
+          ],
+          "description": "Cause dano adicional com feitiços.",
+          "mechanics": "Seus feitiços causam 5 pontos de dano adicional. Se estiver no 40° nível ou acima, esse dano aumenta para +10."
+        }
       ]
     },
     {
@@ -738,6 +822,34 @@
           "duration": "Instantânea",
           "isOffensive": true,
           "mechanics": "Você invoca a ruína contra o adversário, transformando força em fraqueza. O alvo perde uma quantidade de PV igual a (20 + metade do nível do alvo)."
+        }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Cometa",
+          "requirements": "Dominar a classe entropista.",
+          "description": "Aprenda o feitiço Cometa.",
+          "mechanics": "Você aprende o feitiço supremo de entropista: Cometa.",
+          "grantsSpell": true,
+          "spell": {
+            "name": "Cometa",
+            "pmCost": "50",
+            "target": "Especial",
+            "duration": "Instantânea",
+            "isOffensive": true,
+            "mechanics": "Você abre um grande portal do Cosmos, convocando uma rocha astral do vazio. Escolha uma opção: causa 60 pontos de dano a uma criatura que você possa ver; ou causa 40 pontos de dano a todos os inimigos que possa ver. Esses danos aumentam em +5 se estiver no 20° nível ou acima, e em +10 se estiver no 40° nível ou acima. Esses danos não têm tipo (portanto, não são afetados por Afinidades a dano)."
+          }
+        },
+        {
+          "name": "Feitiço Poderoso",
+          "requirements": "Dominar uma ou mais classes entre elementalista, entropista, espiritualista e quimerista.",
+          "sharedWith": [
+            "Elementalista",
+            "Espiritualista",
+            "Quimerista"
+          ],
+          "description": "Cause dano adicional com feitiços.",
+          "mechanics": "Seus feitiços causam 5 pontos de dano adicional. Se estiver no 40° nível ou acima, esse dano aumenta para +10."
         }
       ]
     },
@@ -886,6 +998,34 @@
           "isOffensive": true,
           "mechanics": "Você sufoca a energia da alma dos adversários, dificultando seus movimentos. Escolha fraco ou lento: cada alvo atingido é afligido pela condição escolhida."
         }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Esperança",
+          "requirements": "Dominar a classe espiritualista.",
+          "description": "Aprenda o feitiço Esperança.",
+          "mechanics": "Você aprende o feitiço supremo de espiritualista: Esperança.",
+          "grantsSpell": true,
+          "spell": {
+            "name": "Esperança",
+            "pmCost": "40",
+            "target": "Especial",
+            "duration": "Instantânea",
+            "isOffensive": false,
+            "mechanics": "Você reacende as chamas da coragem e da esperança de um herói derrotado. Escolha um PJ que tenha se rendido e ainda esteja narrativamente presente na cena: esse alvo imediatamente recobra a consciência e recupera PV igual à metade dos seus PV máximos. Não cancela as consequências da rendição e não tem utilidade se o personagem tiver saído de cena. Um PJ só pode ser afetado por esse feitiço uma vez por cena."
+          }
+        },
+        {
+          "name": "Feitiço Poderoso",
+          "requirements": "Dominar uma ou mais classes entre elementalista, entropista, espiritualista e quimerista.",
+          "sharedWith": [
+            "Elementalista",
+            "Entropista",
+            "Quimerista"
+          ],
+          "description": "Cause dano adicional com feitiços.",
+          "mechanics": "Seus feitiços causam 5 pontos de dano adicional. Se estiver no 40° nível ou acima, esse dano aumenta para +10."
+        }
       ]
     },
     {
@@ -925,6 +1065,23 @@
           "maxLevel": 5,
           "description": "Cura PV e melhora um Atributo ao fazer Guarda.",
           "mechanics": "Ao fazer Guarda sem dar cobertura a ninguém, recupere PV igual a (NP x a maior força de Laço que tiver) e escolha Vigor ou Vontade: até o fim do próximo turno, o dado atual desse Atributo sobe um passo (máximo d12)."
+        }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Mão de Gorila",
+          "requirements": "Dominar a classe furioso.",
+          "description": "Equipe algumas armas de duas mãos em um espaço de uma mão.",
+          "mechanics": "Você pode equipar armas de duas mãos das categorias espada, lança, malho e pesada usando um único espaço de mão. Além disso, o primeiro ataque que fizer com uma arma de duas mãos em cada turno causa 5 pontos de dano adicional e ignora Resistências."
+        },
+        {
+          "name": "Ataque Poderoso",
+          "requirements": "Dominar uma ou mais classes entre furioso e mestre de armas.",
+          "sharedWith": [
+            "Mestre de Armas"
+          ],
+          "description": "Cause dano corpo a corpo adicional.",
+          "mechanics": "Seus ataques corpo a corpo causam 5 pontos de dano adicional. Se estiver no 40° nível ou acima, esse dano aumenta para +10."
         }
       ]
     },
@@ -966,6 +1123,20 @@
           "description": "Assume o perigo no lugar de um aliado.",
           "mechanics": "Quando outra criatura é ameaçada por um ataque, feitiço ou perigo, você pode tomar o lugar dela: os testes envolvidos passam a ser feitos contra você. Não pode ser reusado até o início do seu próximo turno em conflito."
         }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Imbatível",
+          "requirements": "Dominar a classe guardião.",
+          "description": "Sobreviva a um golpe fatal uma vez por cena.",
+          "mechanics": "Uma vez por cena, quando estiver prestes a ficar com 0 PV, em vez disso você pode resistir à dor e ficar com exatamente 1 PV."
+        },
+        {
+          "name": "Muralha",
+          "requirements": "Dominar a classe guardião.",
+          "description": "Resista a dano e condições durante a primeira rodada.",
+          "mechanics": "No início da primeira rodada de cada cena de conflito, você é Resistente a todos os tipos de dano e não pode sofrer condições (mas não se recupera de condições anteriores). Este benefício dura até o fim da primeira rodada."
+        }
       ]
     },
     {
@@ -1004,6 +1175,20 @@
           "maxLevel": 1,
           "description": "Some da cena e reaparece em outro lugar.",
           "mechanics": "Gaste uma ação e 1 Ponto de Fabula para desaparecer da cena atual e reaparecer quando quiser em outra cena com outro PJ."
+        }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Sumir",
+          "requirements": "Dominar a classe ladino.",
+          "description": "Desapareça após um ataque.",
+          "mechanics": "Quando atinge uma ou mais criaturas com um ataque, você pode gastar 1 Ponto de Fabula. Se fizer isso, cada uma dessas criaturas torna-se incapaz de ver você até o início do seu próximo turno."
+        },
+        {
+          "name": "Pilhar",
+          "requirements": "Dominar a classe ladino e ter o poder Roubo de Alma.",
+          "description": "Roube de várias criaturas.",
+          "mechanics": "Quando usa Roubo de Alma, você pode escolher como alvo um número qualquer de criaturas ao mesmo tempo (faça um único teste e compare-o à Defesa Mágica de cada criatura que deseja furtar)."
         }
       ]
     },
@@ -1045,6 +1230,20 @@
           "description": "Resistência a trevas e veneno em crise.",
           "mechanics": "Enquanto estiver em crise, você tem Resistência a dano de trevas e de veneno."
         }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Adversidade",
+          "requirements": "Dominar a classe guerreiro sombrio.",
+          "description": "Extraia força das condições.",
+          "mechanics": "Enquanto estiver sofrendo uma ou mais condições, você recebe +1 em todos os testes e causa 2 pontos de dano adicional (com Arcanos, ataques, feitiços, itens ou qualquer outro método) para cada condição que estiver sofrendo."
+        },
+        {
+          "name": "Desalmado",
+          "requirements": "Dominar a classe guerreiro sombrio.",
+          "description": "Sacrifique PV para causar dano.",
+          "mechanics": "Quando atinge uma criatura com um ataque, se apenas essa criatura for o alvo e você tiver um Laço com ela, pode gastar metade de seus PV atuais (arredondada para baixo). Se fizer isso, o ataque causa (10 x a força de seu Laço com o alvo) pontos de dano adicional. Só pode ser usado uma vez em cada um dos seus turnos em um conflito."
+        }
       ]
     },
     {
@@ -1085,6 +1284,23 @@
           "description": "Ataque especial que destrói equipamento ou causa dano contínuo.",
           "mechanics": "Gaste uma ação e 5 PM para um ataque livre corpo a corpo de alvo único, sem causar dano; se acertar, escolha: destruir o escudo do alvo; ou destruir a armadura dele; ou fazer com que ele sofra (NP x 2) de dano adicional de todas as fontes até seu próximo turno."
         }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Golpe Tempestuoso",
+          "requirements": "Dominar a classe mestre de armas.",
+          "description": "Concentre ataques multi em 1 alvo.",
+          "mechanics": "Quando faz um ataque corpo a corpo com a propriedade multi, você recebe um bônus em seu teste de Precisão igual ao valor dessa multi e o ataque causa 5 pontos de dano adicional. Se atingir uma única criatura, causa mais 5 pontos de dano."
+        },
+        {
+          "name": "Ataque Poderoso",
+          "requirements": "Dominar uma ou mais classes entre furioso e mestre de armas.",
+          "sharedWith": [
+            "Furioso"
+          ],
+          "description": "Cause dano corpo a corpo adicional.",
+          "mechanics": "Seus ataques corpo a corpo causam 5 pontos de dano adicional. Se estiver no 40° nível ou acima, esse dano aumenta para +10."
+        }
       ]
     },
     {
@@ -1123,6 +1339,20 @@
           "maxLevel": 2,
           "description": "Acelera o preenchimento de relógios sociais.",
           "mechanics": "Ao passar em um teste de charme, diplomacia, engano ou intimidação para preencher/apagar seções de um relógio, gaste até (NP x 20) PM para preencher/apagar uma seção adicional a cada 20 PM gastos."
+        }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Repetição",
+          "requirements": "Dominar a classe orador.",
+          "description": "Condene ou Encoraje duas vezes.",
+          "mechanics": "Uma vez por turno em um conflito, após usar Condenar ou Encorajar, você pode reutilizá-lo (no mesmo alvo ou em outro). Ainda deve pagar o custo em PM por esse segundo uso."
+        },
+        {
+          "name": "Retórica Desarmante",
+          "requirements": "Dominar a classe orador.",
+          "description": "Convença inimigos a recuarem.",
+          "mechanics": "Durante uma cena de conflito, use uma ação para escolher uma criatura de patente soldado que possa ouvi-lo e entendê-lo. Se essa criatura estiver abalada ou em crise, gaste PM igual a (20 + metade do nível da criatura alvo) para fazer com que ela saia do conflito de maneira pacífica."
         }
       ]
     },
@@ -1164,6 +1394,25 @@
           "description": "Permite rituais da disciplina quimerismo.",
           "mechanics": "Você pode fazer rituais de quimerismo. Ao obter este poder, escolha (AST+VON) ou (VIG+VON) para o teste de Magia desses rituais."
         }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Domínio Quimérico",
+          "requirements": "Dominar a classe quimerista.",
+          "description": "Aprenda feitiços com novas espécies e aumente seu limite.",
+          "mechanics": "Escolha duas espécies entre construto, demônio, elemental e morto-vivo. Você pode usar Imitação Mágica para aprender feitiços de criaturas dessas espécies. Pode ser adquirido até duas vezes (escolhendo duas espécies por vez). Sempre que adquirir este poder, aumenta seu limite de feitiços memorizados de Quimerista em +2."
+        },
+        {
+          "name": "Feitiço Poderoso",
+          "requirements": "Dominar uma ou mais classes entre elementalista, entropista, espiritualista e quimerista.",
+          "sharedWith": [
+            "Elementalista",
+            "Entropista",
+            "Espiritualista"
+          ],
+          "description": "Cause dano adicional com feitiços.",
+          "mechanics": "Seus feitiços causam 5 pontos de dano adicional. Se estiver no 40° nível ou acima, esse dano aumenta para +10."
+        }
       ]
     },
     {
@@ -1203,7 +1452,53 @@
           "description": "Lembra com perfeição de cenas recentes.",
           "mechanics": "Você lembra com perfeição de qualquer cena vivida na última semana, podendo revisitá-la mentalmente e usar Lampejo de Saber sobre ela."
         }
+      ],
+      "heroicPowers": [
+        {
+          "name": "Matemágica",
+          "requirements": "Dominar a classe erudito.",
+          "description": "Estenda feitiços de alvo único.",
+          "mechanics": "Ao lançar um feitiço com alvo 'uma criatura', escolha um Atributo e um tipo de dado. O alvo do feitiço se torna 'todas as criaturas na cena cujo dado básico do Atributo escolhido corresponde à sua escolha', e o custo total em PM é dobrado (ajuste o texto do feitiço de 'o alvo' para 'cada alvo', ou 'um ou mais alvos' para Anomalia, Dissipar, Espelhar ou Piedade). Se for um feitiço ofensivo, faça um único teste de Magia comparado à Defesa Mágica de cada alvo."
+        },
+        {
+          "name": "Previsível!",
+          "requirements": "Dominar a classe erudito.",
+          "description": "Force um inimigo a gastar PM para fazer ações específicas.",
+          "mechanics": "Em um conflito, use uma ação e 20 PM para antecipar os movimentos de uma criatura visível da qual conheça dois ou mais Traços. Escolha um tipo de ação (Ataque, Feitiço, Guarda, Objetivo ou Poder). Até o início do seu próximo turno, a criatura deve gastar 20 PM sempre que quiser fazer essa ação; se não puder, deve fazer uma ação diferente."
+        }
       ]
+    }
+  ],
+  "universalHeroicPowers": [
+    {
+      "name": "Ambidestria",
+      "requirements": null,
+      "description": "Lute com duas armas de categorias diferentes.",
+      "mechanics": "Você pode aplicar os benefícios de luta com duas armas a qualquer arma, mesmo pertencentes a categorias diferentes ou sendo uma corpo a corpo e outra à distância (como adaga e arma de fogo). Enquanto tiver duas armas equipadas que não compartilhem categoria, recebe +2 na Defesa e o segundo ataque que fizer em cada turno causa 5 pontos de dano adicional."
+    },
+    {
+      "name": "Feitiços Extras",
+      "requirements": null,
+      "description": "Aprenda dois feitiços de uma classe à sua escolha.",
+      "mechanics": "Ao adquirir este poder, aprenda dois feitiços de uma das seguintes listas: elementalista, entropista ou espiritualista. Ambos devem ser da mesma lista e seguem as regras padrão da classe correspondente para serem lançados."
+    },
+    {
+      "name": "PM Extras",
+      "requirements": null,
+      "description": "Aumente seus PM máximos.",
+      "mechanics": "Aumente permanentemente seus PM máximos em 10. Se estiver no 40° nível ou acima, esses PM adicionais aumentam para 20."
+    },
+    {
+      "name": "PI Extras",
+      "requirements": null,
+      "description": "Aumente seus PI máximos.",
+      "mechanics": "Aumente permanentemente seus PI máximos em 4."
+    },
+    {
+      "name": "PV Extras",
+      "requirements": null,
+      "description": "Aumente seus PV máximos.",
+      "mechanics": "Aumente permanentemente seus PV máximos em 10. Se estiver no 40° nível ou acima, esses PV adicionais aumentam para 20."
     }
   ]
 }
