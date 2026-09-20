@@ -47,6 +47,7 @@ Crie heróis lendários, acompanhe seus atributos de dados ($d6$ a $d12$), geren
  │ 🏰 GALERIA DE PERSONAGENS                                 │
  │   • Armazém local e seguro via banco SQLite nativo        │
  │   • Gestão de múltiplos aventureiros e campanhas          │
+  │   • Fotos dos heróis (reabrir e editar ficha salva)       │
  ├───────────────────────────────────────────────────────────┤
  │ 🗡️ FICHA COMPLETA INTERATIVA                              │
  │   • Cálculo automático de HP, MP, IP e Atributos          │

@@ -14,6 +14,14 @@ interface CharacterSheetViewProps {
   onBack: () => void;
   onLevelUp?: () => void;
   formatWeaponAttack: (weapon: Weapon, attributes: AttributeStats) => string;
+  /** Data URI of the hero photo, or null when there is none. */
+  photoBase64?: string | null;
+  /** Opens the file picker to attach/replace the hero photo (only for saved heroes). */
+  onChangePhoto?: () => void;
+  /** True when a saved hero is being edited (gallery reopen). */
+  isEditing?: boolean;
+  /** Updates a sheet field inline (only wired when editing a saved hero). */
+  onEditField?: (field: "name" | "identity" | "theme", value: string) => void;
 }
 
 /** Renders a character sheet while delegating persistence, export, and navigation to the parent. */
@@ -26,15 +34,51 @@ export const CharacterSheetView = ({
   onBack,
   onLevelUp,
   formatWeaponAttack,
+  photoBase64,
+  onChangePhoto,
+  isEditing,
+  onEditField,
 }: CharacterSheetViewProps) => {
   const [showExportModal, setShowExportModal] = useState(false);
 
   return (
     <div className="w-full max-w-3xl jrpg-container p-6 space-y-6 animate-[fadeIn_0.3s_ease-out] relative">
       <div className="flex justify-between items-center border-b-2 border-white/20 pb-4 no-print">
-        <h2 className="pixel-font text-xs sm:text-sm text-yellow-300">
-          {strings.sheet.title}
-        </h2>
+        <div className="flex items-center gap-3">
+          <div className="relative shrink-0">
+            {photoBase64 ? (
+              <img
+                src={photoBase64}
+                alt={strings.sheet.photoPlaceholder}
+                className="w-16 h-16 rounded-sm object-cover border-2 border-white/30 shadow-[2px_2px_0px_0px_rgba(0,0,0,0.4)]"
+              />
+            ) : (
+              <div className="w-16 h-16 rounded-sm border-2 border-dashed border-white/30 bg-black/40 flex items-center justify-center text-white/40 text-[8px] font-mono uppercase tracking-wider text-center px-1">
+                {strings.sheet.noPhoto}
+              </div>
+            )}
+            {isEditing && onChangePhoto && (
+              <button
+                type="button"
+                onClick={onChangePhoto}
+                title={strings.sheet.changePhoto}
+                className="absolute -top-2 -right-2 px-1 py-0.5 bg-yellow-300 text-black text-[9px] font-bold rounded border-2 border-black shadow-[1px_1px_0px_0px_rgba(0,0,0,0.4)] hover:bg-yellow-200"
+              >
+                📷
+              </button>
+            )}
+          </div>
+          <div>
+            <h2 className="pixel-font text-xs sm:text-sm text-yellow-300">
+              {strings.sheet.title}
+            </h2>
+            {isEditing && (
+              <p className="text-[9px] text-yellow-400/80 font-mono mt-0.5">
+                ● {strings.sheet.editingSavedHero}
+              </p>
+            )}
+          </div>
+        </div>
 
         <div className="flex gap-2">
           {onLevelUp && sheet.level < 50 && (
@@ -83,13 +127,40 @@ export const CharacterSheetView = ({
               <div className="space-y-4">
                 <div className="jrpg-panel p-4 space-y-2">
                   <p className="text-[10px] text-gray-400 uppercase tracking-widest">{strings.sheet.name}</p>
-                  <p className="text-sm font-bold text-yellow-300">{sheet.name}</p>
+                  {isEditing && onEditField ? (
+                    <input
+                      type="text"
+                      value={sheet.name}
+                      onChange={(event) => onEditField("name", event.target.value)}
+                      className="w-full bg-black/50 border border-white/30 rounded px-2 py-1 text-sm font-bold text-yellow-300 focus:border-yellow-400 focus:outline-none"
+                    />
+                  ) : (
+                    <p className="text-sm font-bold text-yellow-300">{sheet.name}</p>
+                  )}
 
                   <p className="text-[10px] text-gray-400 uppercase tracking-widest mt-2">{strings.sheet.identity}</p>
-                  <p className="text-xs italic text-cyan-200">"{sheet.identity}"</p>
+                  {isEditing && onEditField ? (
+                    <input
+                      type="text"
+                      value={sheet.identity}
+                      onChange={(event) => onEditField("identity", event.target.value)}
+                      className="w-full bg-black/50 border border-white/30 rounded px-2 py-1 text-xs italic text-cyan-200 focus:border-cyan-300 focus:outline-none"
+                    />
+                  ) : (
+                    <p className="text-xs italic text-cyan-200">"{sheet.identity}"</p>
+                  )}
 
                   <p className="text-[10px] text-gray-400 uppercase tracking-widest mt-2">{strings.sheet.theme}</p>
-                  <p className="text-xs text-white">{sheet.theme}</p>
+                  {isEditing && onEditField ? (
+                    <input
+                      type="text"
+                      value={sheet.theme}
+                      onChange={(event) => onEditField("theme", event.target.value)}
+                      className="w-full bg-black/50 border border-white/30 rounded px-2 py-1 text-xs text-white focus:border-white focus:outline-none"
+                    />
+                  ) : (
+                    <p className="text-xs text-white">{sheet.theme}</p>
+                  )}
                 </div>
 
                 <div className="jrpg-panel p-4 space-y-2">

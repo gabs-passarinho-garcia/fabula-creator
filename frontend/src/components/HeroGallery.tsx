@@ -1,4 +1,5 @@
 import { Download, Trash2, TrendingUp } from "lucide-react";
+import { useEffect, useState } from "react";
 import type { Locale } from "../i18n/types";
 import type { CharacterSheet } from "../types";
 import type { SavedCharacterRecord } from "../services/characterRepository";
@@ -13,7 +14,46 @@ interface HeroGalleryProps {
   onLevelUp: (sheet: CharacterSheet, recordId: number) => void;
   onExport: (sheet: CharacterSheet) => void;
   onDelete: (id: number) => void;
+  /** Fetches a hero photo as a data URI, lazily, for thumbnails. */
+  onLoadPhoto?: (recordId: number) => Promise<string | null>;
 }
+
+/** Lazily loads the hero photo for a single card thumbnail. */
+const HeroPhotoThumb = ({
+  recordId,
+  hasPhoto,
+  onLoadPhoto,
+}: {
+  recordId: number;
+  hasPhoto: boolean;
+  onLoadPhoto: (recordId: number) => Promise<string | null>;
+}) => {
+  const [photo, setPhoto] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!hasPhoto) return;
+    let cancelled = false;
+    onLoadPhoto(recordId)
+      .then((dataUri) => {
+        if (!cancelled) setPhoto(dataUri);
+      })
+      .catch(() => {
+        if (!cancelled) setPhoto(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [recordId, hasPhoto, onLoadPhoto]);
+
+  if (!photo) return null;
+  return (
+    <img
+      src={photo}
+      alt=""
+      className="w-10 h-10 rounded-sm object-cover border border-white/30 shrink-0"
+    />
+  );
+};
 
 /** Renders persisted character sheets and delegates all side effects to the parent. */
 export const HeroGallery = ({
@@ -25,6 +65,7 @@ export const HeroGallery = ({
   onLevelUp,
   onExport,
   onDelete,
+  onLoadPhoto,
 }: HeroGalleryProps) => (
   <div className="w-full max-w-3xl jrpg-container p-6 space-y-6">
     <div className="flex justify-between items-center border-b-2 border-white/20 pb-4">
@@ -65,10 +106,19 @@ export const HeroGallery = ({
             <div key={record.id} className="jrpg-panel p-4 flex flex-col justify-between hover:border-yellow-400 transition relative group">
               <button onClick={() => onOpen(sheet, record.id)} className="space-y-2 flex-1 text-left w-full">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="pixel-font text-xs text-yellow-300 group-hover:text-yellow-200">{sheet.name}</p>
-                  <span className="text-[9px] px-1.5 py-0.5 bg-yellow-950/60 border border-yellow-500/40 text-yellow-400 font-mono font-bold shrink-0">
-                    {locale === "pt" ? `Nv. ${sheetLevel}` : `Lv. ${sheetLevel}`}
-                  </span>
+                  {onLoadPhoto && (
+                    <HeroPhotoThumb
+                      recordId={record.id}
+                      hasPhoto={Boolean(record.photo_path)}
+                      onLoadPhoto={onLoadPhoto}
+                    />
+                  )}
+                  <div className="flex items-center justify-between gap-2 flex-1 min-w-0">
+                    <p className="pixel-font text-xs text-yellow-300 group-hover:text-yellow-200">{sheet.name}</p>
+                    <span className="text-[9px] px-1.5 py-0.5 bg-yellow-950/60 border border-yellow-500/40 text-yellow-400 font-mono font-bold shrink-0">
+                      {locale === "pt" ? `Nv. ${sheetLevel}` : `Lv. ${sheetLevel}`}
+                    </span>
+                  </div>
                 </div>
                 <p className="text-xs text-white/70 italic line-clamp-1">{sheet.identity}</p>
                 <p className="text-xs text-blue-300 line-clamp-1">{classSummary}</p>

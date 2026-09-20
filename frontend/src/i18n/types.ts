@@ -114,5 +114,15 @@ export interface LocaleStrings {
     spellDuration: (duration: string) => string;
     /** Formats current skill rank versus catalog maximum */
     powerRank: (rank: number, maxLevel: number) => string;
+    /** Tooltip/label for the Change Photo button */
+    changePhoto: string;
+    /** Fallback text shown when a hero has no photo */
+    noPhoto: string;
+    /** Indicator shown when a saved hero is being edited */
+    editingSavedHero: string;
+    /** Alt text for the hero photo */
+    photoPlaceholder: string;
+    /** Hint text near the photo picker */
+    selectPhotoHint: string;
   };
 }

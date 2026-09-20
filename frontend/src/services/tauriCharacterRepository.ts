@@ -17,4 +17,12 @@ export const createTauriCharacterRepository = (): CharacterRepository => ({
   delete: async (id: number): Promise<void> => {
     await invokeTauri<void>("delete_character", { id });
   },
+  savePhoto: async (id: number, base64Data: string): Promise<void> => {
+    await invokeTauri<void>("save_character_photo", { id, base64Data });
+  },
+  deletePhoto: async (id: number): Promise<void> => {
+    await invokeTauri<void>("delete_character_photo", { id });
+  },
+  getPhoto: (id: number): Promise<string | null> =>
+    invokeTauri<string | null>("get_character_photo", { id }),
 });

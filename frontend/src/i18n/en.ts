@@ -111,5 +111,10 @@ export const en: LocaleStrings = {
     spellTarget: (target) => `Target: ${target}`,
     spellDuration: (duration) => `Duration: ${duration}`,
     powerRank: (rank, maxLevel) => `SL ${rank}/${maxLevel}`,
+    changePhoto: 'Change Photo',
+    noPhoto: 'No Photo',
+    editingSavedHero: 'Editing saved hero',
+    photoPlaceholder: 'Hero photo',
+    selectPhotoHint: 'Select an image for the hero',
   },
 };

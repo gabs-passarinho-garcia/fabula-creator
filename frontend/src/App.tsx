@@ -84,6 +84,8 @@ export default function App() {
   const [activeSheet, setActiveSheet] = useState<CharacterSheet | null>(null);
   // Id of the persisted record backing `activeSheet` (null for unsaved sheets)
   const [activeRecordId, setActiveRecordId] = useState<number | null>(null);
+  // Data URI of the photo of the hero currently open on the sheet.
+  const [currentPhotoBase64, setCurrentPhotoBase64] = useState<string | null>(null);
   const [successModal, setSuccessModal] = useState<SuccessModal>(null);
 
   // --- Manual Creation States ---
@@ -144,6 +146,45 @@ export default function App() {
     void loadSavedCharacters();
   }, [loadSavedCharacters]);
 
+  /** Loads the hero photo (data URI) for the currently open record. */
+  const loadHeroPhoto = useCallback(async (recordId: number): Promise<string | null> => {
+    try {
+      const photo = await repository.getPhoto(recordId);
+      setCurrentPhotoBase64(photo);
+      return photo;
+    } catch {
+      setCurrentPhotoBase64(null);
+      return null;
+    }
+  }, [repository]);
+
+  /** Opens a file picker, converts the image to base64 and persists it. */
+  const handleChangePhotoFile = () => {
+    if (activeRecordId === null) return;
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const dataUri = String(reader.result);
+        const base64Data = dataUri.split(",")[1] ?? "";
+        if (!base64Data) return;
+        try {
+          await repository.savePhoto(activeRecordId, base64Data);
+          setCurrentPhotoBase64(await repository.getPhoto(activeRecordId));
+          await loadSavedCharacters();
+        } catch (error) {
+          console.error("Failed to save photo:", error);
+        }
+      };
+      reader.readAsDataURL(file);
+    };
+    input.click();
+  };
+
   const saveCharacterToDb = async (sheet: CharacterSheet) => {
     if (activeRecordId !== null) {
       // Editing a hero loaded from the gallery keeps a single record per hero.
@@ -163,6 +204,11 @@ export default function App() {
       heroicPowers: sheet.heroicPowers ?? [],
     };
   }, []);
+
+  /** Inline edit of name/identity/theme on a saved hero's sheet. */
+  const handleEditSheetField = (field: "name" | "identity" | "theme", value: string) => {
+    setActiveSheet((current) => (current ? { ...current, [field]: value } : current));
+  };
 
   /** Persists a leveled sheet when it came from the gallery, otherwise keeps it in memory. */
   const persistEvolvedSheet = async (sheet: CharacterSheet) => {
@@ -217,6 +263,7 @@ export default function App() {
 
     setActiveSheet(sheet);
     setActiveRecordId(null);
+    setCurrentPhotoBase64(null);
     setCurrentScreen("sheet");
     setTimeout(() => {
       playLevelUp();
@@ -292,6 +339,7 @@ export default function App() {
     setSelectedArmor(null);
     setSelectedShield(null);
     setActiveRecordId(null);
+    setCurrentPhotoBase64(null);
 
     setCurrentScreen("manual");
   };
@@ -559,6 +607,7 @@ export default function App() {
 
     setActiveSheet(sheet);
     setActiveRecordId(null);
+    setCurrentPhotoBase64(null);
     setCurrentScreen("sheet");
     setTimeout(() => {
       playLevelUp();
@@ -597,6 +646,7 @@ export default function App() {
           playLevelUp();
           setActiveSheet(normalizeSheet(sheet));
           setActiveRecordId(null);
+          setCurrentPhotoBase64(null);
           setCurrentScreen("sheet");
           confetti({ particleCount: 50, spread: 40 });
           setSuccessModal({
@@ -691,17 +741,20 @@ export default function App() {
               playConfirm();
               setActiveSheet(normalizeSheet(sheet));
               setActiveRecordId(recordId);
+              void loadHeroPhoto(recordId);
               setCurrentScreen("sheet");
             }}
             onLevelUp={(sheet, recordId) => {
               playConfirm();
               setActiveSheet(normalizeSheet(sheet));
               setActiveRecordId(recordId);
+              void loadHeroPhoto(recordId);
               setLevelUpTargetClass("");
               setLevelUpTargetPower("");
               setShowLevelUpModal(true);
             }}
             onExport={handleExportJson}
+            onLoadPhoto={loadHeroPhoto}
             onDelete={(id) => {
               playCancel();
               if (confirm(locale === "pt" ? "Tem certeza que deseja apagar este herói?" : "Are you sure you want to delete this hero?")) {
@@ -1679,6 +1732,10 @@ export default function App() {
             }}
             onLevelUp={() => setShowLevelUpModal(true)}
             formatWeaponAttack={formatWeaponAttackString}
+            photoBase64={currentPhotoBase64}
+            onChangePhoto={handleChangePhotoFile}
+            isEditing={activeRecordId !== null}
+            onEditField={handleEditSheetField}
           />
         )}
 

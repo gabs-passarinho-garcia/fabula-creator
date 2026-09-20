@@ -41,4 +41,24 @@ export const createLocalStorageCharacterRepository = (
     const records = await this.load();
     storage.setItem(STORAGE_KEY, JSON.stringify(records.filter((record) => record.id !== id)));
   },
+  async savePhoto(id: number, base64Data: string): Promise<void> {
+    const records = await this.load();
+    const updated = records.map((record) =>
+      record.id === id ? { ...record, photo_path: `photos/${id}.jpg` } : record,
+    );
+    storage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    // Base64 bytes are kept alongside the path so getPhoto can serve them back.
+    storage.setItem(`${STORAGE_KEY}_photo_${id}`, base64Data);
+  },
+  async deletePhoto(id: number): Promise<void> {
+    const records = await this.load();
+    const updated = records.map((record) =>
+      record.id === id ? { ...record, photo_path: null } : record,
+    );
+    storage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    storage.removeItem(`${STORAGE_KEY}_photo_${id}`);
+  },
+  async getPhoto(id: number): Promise<string | null> {
+    return storage.getItem(`${STORAGE_KEY}_photo_${id}`);
+  },
 });
